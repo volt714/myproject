@@ -11,10 +11,11 @@ interface LoginData {
 
 interface LoginScreenProps {
   onLogin?: (user: User) => void; // preferred
-  setCurrentUser?: (user: User) => void; // legacy fallback
+  setCurrentUser?: (user: User | null) => void; // legacy fallback
+  onSwitchToSignUp: () => void;
 }
 
-const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, setCurrentUser }) => {
+const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, setCurrentUser, onSwitchToSignUp }) => {
   const [loginData, setLoginData] = useState<LoginData>({
     email: '',
     password: '',
@@ -202,6 +203,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, setCurrentUser }) =>
             <div className="flex justify-between">
               <span className="font-medium">Vendor:</span>
               <span>vendor@company.com / password</span>
+            </div>
+            <div className="text-center text-sm text-gray-600">
+              <p>
+                Don't have an account?{' '}
+                <button onClick={onSwitchToSignUp} className="font-medium text-blue-600 hover:underline">
+                  Sign Up
+                </button>
+              </p>
             </div>
           </div>
         </div>
