@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { FileText, DollarSign, Users, Package, Home, LogOut } from 'lucide-react';
 import { User } from '@/types';
 import { supabase } from '@/utils/supabaseClient';
@@ -83,7 +84,7 @@ const menuItems: MenuItem[] = [
       <div className="p-4 border-t border-gray-200">
         <div className="flex items-center gap-3 mb-4">
           {currentUser?.avatarUrl ? (
-            <img src={currentUser.avatarUrl} alt={currentUser.name} className="w-10 h-10 rounded-full" />
+            <Image src={currentUser.avatarUrl} alt={currentUser.name} width={40} height={40} className="rounded-full" />
           ) : (
             <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
               {getUserInitial(currentUser?.name)}

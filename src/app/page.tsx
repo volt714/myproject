@@ -9,7 +9,7 @@ import PurchaseOrders from '@/components/PurchaseOrders';
 import DocumentManagement from '@/components/DocumentManagement';
 import LoginScreen from '@/components/LoginScreen';
 import Modal from '@/components/Modal';
-import { User, RFQ, Quote, Vendor, Order, ModalType, RfqItem } from '@/types';
+import { User, RFQ, Quote, Vendor, Order, ModalType } from '@/types';
 import { supabase } from '@/utils/supabaseClient';
 
 // Sample Data aligned with new types
@@ -180,10 +180,10 @@ export default function VendorManagementApp() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [rfqs, setRfqs] = useState<RFQ[]>(sampleRfqs);
-  const [quotes, setQuotes] = useState<Quote[]>(sampleQuotes);
-  const [vendors, setVendors] = useState<Vendor[]>(sampleVendors);
-  const [orders, setOrders] = useState<Order[]>(sampleOrders);
+  const [rfqs] = useState<RFQ[]>(sampleRfqs);
+  const [quotes] = useState<Quote[]>(sampleQuotes);
+  const [vendors] = useState<Vendor[]>(sampleVendors);
+  const [orders] = useState<Order[]>(sampleOrders);
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedItem, setSelectedItem] = useState<RFQ | Vendor | Quote | Order | null>(null);
 

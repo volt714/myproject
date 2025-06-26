@@ -197,7 +197,7 @@ const RFQManagement: FC<RFQManagementProps> = ({
               Showing {filteredRfqs.length} of {rfqs.length} RFQs
               {searchTerm && (
                 <span className="ml-1">
-                  matching "{searchTerm}"
+                  matching &quot;{searchTerm}&quot;
                 </span>
               )}
             </p>

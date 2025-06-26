@@ -84,7 +84,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, setCurrentUser }) =>
           setCurrentUser(user);
         }
       }
-    } catch (err) {
+    } catch {
       setError('An error occurred during login. Please try again.');
     } finally {
       setIsLoading(false);
@@ -164,7 +164,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, setCurrentUser }) =>
             <select
               id="role"
               value={loginData.role}
-              onChange={handleInputChange('role') as any}
+              onChange={handleInputChange('role')}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             >
               <option value="admin">Admin</option>
