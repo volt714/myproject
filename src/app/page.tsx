@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Dashboard from '@/components/Dashboard';
 import RFQManagement from '@/components/RFQManagement';
@@ -10,6 +10,7 @@ import DocumentManagement from '@/components/DocumentManagement';
 import LoginScreen from '@/components/LoginScreen';
 import Modal from '@/components/Modal';
 import { User, RFQ, Quote, Vendor, Order, ModalType, RfqItem } from '@/types';
+import { supabase } from '@/utils/supabaseClient';
 
 // Sample Data aligned with new types
 const sampleRfqs: RFQ[] = [
@@ -177,6 +178,7 @@ const sampleOrders: Order[] = [
 
 export default function VendorManagementApp() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [rfqs, setRfqs] = useState<RFQ[]>(sampleRfqs);
   const [quotes, setQuotes] = useState<Quote[]>(sampleQuotes);
@@ -184,6 +186,41 @@ export default function VendorManagementApp() {
   const [orders, setOrders] = useState<Order[]>(sampleOrders);
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedItem, setSelectedItem] = useState<RFQ | Vendor | Quote | Order | null>(null);
+
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching profile:', error);
+          setCurrentUser(null);
+        } else if (profile) {
+          const user: User = {
+            id: profile.id,
+            name: profile.full_name,
+            role: profile.role,
+            email: session.user.email!,
+            avatarUrl: profile.avatar_url,
+          };
+          setCurrentUser(user);
+        }
+      } else {
+        setCurrentUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const handleLogin = (user: User) => {
     setCurrentUser(user);
@@ -199,6 +236,14 @@ export default function VendorManagementApp() {
     setModalType(null);
     setSelectedItem(null);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   if (!currentUser) {
     return <LoginScreen onLogin={handleLogin} />;

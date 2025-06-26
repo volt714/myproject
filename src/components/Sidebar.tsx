@@ -1,6 +1,7 @@
 import React from 'react';
 import { FileText, DollarSign, Users, Package, Home, LogOut } from 'lucide-react';
 import { User } from '@/types';
+import { supabase } from '@/utils/supabaseClient';
 
 interface SidebarProps {
   currentUser: User | null;
@@ -25,7 +26,12 @@ const menuItems: MenuItem[] = [
     { id: 'documents', label: 'Documents', icon: FileText },
   ];
 
-  const handleSignOut = (): void => {
+  const handleSignOut = async (): Promise<void> => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error signing out:', error);
+      return;
+    }
     setCurrentUser(null);
   };
 

@@ -1,14 +1,8 @@
 import React, { useState, FormEvent } from 'react';
+import { supabase } from '@/utils/supabaseClient';
+import { User } from '@/types';
 
 // Type definitions
-interface User {
-  id: string;
-  name: string;
-  role: 'admin' | 'vendor';
-  email: string;
-  avatarUrl?: string;
-}
-
 interface LoginData {
   email: string;
   password: string;
@@ -33,7 +27,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, setCurrentUser }) =>
   const handleLogin = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setError('');
-    
+
     if (!loginData.email.trim() || !loginData.password.trim()) {
       setError('Please fill in all fields');
       return;
@@ -49,32 +43,46 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, setCurrentUser }) =>
     setIsLoading(true);
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: loginData.email,
+        password: loginData.password,
+      });
 
-      // Demo authentication logic
-      const isValidLogin = (
-        (loginData.email === 'admin@company.com' && loginData.password === 'password' && loginData.role === 'admin') ||
-        (loginData.email === 'vendor@company.com' && loginData.password === 'password' && loginData.role === 'vendor')
-      );
-
-      if (!isValidLogin) {
-        setError('Invalid credentials. Please check your email, password, and role.');
+      if (authError) {
+        setError(authError.message);
         return;
       }
 
-      const user: User = {
-        id: loginData.role === 'admin' ? 'admin_001' : 'vendor_001',
-        name: loginData.role === 'admin' ? 'System Administrator' : 'Vendor Representative',
-        role: loginData.role,
-        email: loginData.email,
-        avatarUrl: `https://i.pravatar.cc/150?u=${loginData.email}`,
-      };
+      if (data.user) {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
 
-      if (onLogin) {
-        onLogin(user);
-      } else if (setCurrentUser) {
-        setCurrentUser(user);
+        if (profileError) {
+          setError('Could not fetch user profile.');
+          return;
+        }
+
+        if (profile.role !== loginData.role) {
+          setError(`You do not have the required permissions. Expected role: ${loginData.role}`);
+          return;
+        }
+
+        const user: User = {
+          id: profile.id,
+          name: profile.full_name,
+          role: profile.role,
+          email: data.user.email!,
+          avatarUrl: profile.avatar_url,
+        };
+
+        if (onLogin) {
+          onLogin(user);
+        } else if (setCurrentUser) {
+          setCurrentUser(user);
+        }
       }
     } catch (err) {
       setError('An error occurred during login. Please try again.');
