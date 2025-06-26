@@ -1,6 +1,6 @@
 import React, { useState, FormEvent } from 'react';
 import { supabase } from '@/utils/supabaseClient';
-import { User } from '@/types';
+
 
 interface SignUpScreenProps {
   onSignUpSuccess: () => void;
@@ -57,7 +57,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignUpSuccess, onSwitchTo
           onSignUpSuccess();
         }
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);

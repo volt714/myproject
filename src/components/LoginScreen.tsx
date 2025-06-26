@@ -206,7 +206,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, setCurrentUser, onSw
             </div>
             <div className="text-center text-sm text-gray-600">
               <p>
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <button onClick={onSwitchToSignUp} className="font-medium text-blue-600 hover:underline">
                   Sign Up
                 </button>
