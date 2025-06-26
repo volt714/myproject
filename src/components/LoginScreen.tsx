@@ -13,9 +13,10 @@ interface LoginScreenProps {
   onLogin?: (user: User) => void; // preferred
   setCurrentUser?: (user: User | null) => void; // legacy fallback
   onSwitchToSignUp: () => void;
+  onSwitchToForgotPassword: () => void;
 }
 
-const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, setCurrentUser, onSwitchToSignUp }) => {
+const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, setCurrentUser, onSwitchToSignUp, onSwitchToForgotPassword }) => {
   const [loginData, setLoginData] = useState<LoginData>({
     email: '',
     password: '',
@@ -149,7 +150,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, setCurrentUser, onSw
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2" htmlFor="password">Password</label>
+            <div className="flex justify-between items-center">
+              <label className="block text-sm font-semibold text-gray-700" htmlFor="password">Password</label>
+              <button type="button" onClick={onSwitchToForgotPassword} className="text-sm font-medium text-blue-600 hover:underline">Forgot Password?</button>
+            </div>
             <input
               id="password"
               type="password"

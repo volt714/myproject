@@ -9,6 +9,7 @@ import PurchaseOrders from '@/components/PurchaseOrders';
 import DocumentManagement from '@/components/DocumentManagement';
 import LoginScreen from '@/components/LoginScreen';
 import SignUpScreen from '@/components/SignUpScreen';
+import ForgotPasswordScreen from '@/components/ForgotPasswordScreen';
 import Modal from '@/components/Modal';
 import { User, RFQ, Quote, Vendor, Order, ModalType } from '@/types';
 import { supabase } from '@/utils/supabaseClient';
@@ -180,7 +181,7 @@ const sampleOrders: Order[] = [
 export default function VendorManagementApp() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [authView, setAuthView] = useState<'login' | 'signup'>('login');
+  const [authView, setAuthView] = useState<'login' | 'signup' | 'forgot-password'>('login');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [rfqs] = useState<RFQ[]>(sampleRfqs);
   const [quotes] = useState<Quote[]>(sampleQuotes);
@@ -251,7 +252,10 @@ export default function VendorManagementApp() {
     if (authView === 'signup') {
       return <SignUpScreen onSignUpSuccess={() => setAuthView('login')} onSwitchToLogin={() => setAuthView('login')} />;
     }
-    return <LoginScreen onLogin={handleLogin} onSwitchToSignUp={() => setAuthView('signup')} />;
+    if (authView === 'forgot-password') {
+      return <ForgotPasswordScreen onSwitchToLogin={() => setAuthView('login')} />;
+    }
+    return <LoginScreen onLogin={handleLogin} onSwitchToSignUp={() => setAuthView('signup')} onSwitchToForgotPassword={() => setAuthView('forgot-password')} />;
   }
 
   return (
