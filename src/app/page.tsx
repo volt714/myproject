@@ -10,6 +10,7 @@ import DocumentManagement from '@/components/DocumentManagement';
 import LoginScreen from '@/components/LoginScreen';
 import SignUpScreen from '@/components/SignUpScreen';
 import ForgotPasswordScreen from '@/components/ForgotPasswordScreen';
+import UpdatePasswordScreen from '@/components/UpdatePasswordScreen';
 import Modal from '@/components/Modal';
 import { User, RFQ, Quote, Vendor, Order, ModalType } from '@/types';
 import { supabase } from '@/utils/supabaseClient';
@@ -181,7 +182,7 @@ const sampleOrders: Order[] = [
 export default function VendorManagementApp() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [authView, setAuthView] = useState<'login' | 'signup' | 'forgot-password'>('login');
+  const [authView, setAuthView] = useState<'login' | 'signup' | 'forgot-password' | 'update-password'>('login');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [rfqs] = useState<RFQ[]>(sampleRfqs);
   const [quotes] = useState<Quote[]>(sampleQuotes);
@@ -191,9 +192,12 @@ export default function VendorManagementApp() {
   const [selectedItem, setSelectedItem] = useState<RFQ | Vendor | Quote | Order | null>(null);
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setAuthView('update-password');
+        setLoading(false);
+        return;
+      }
       if (session?.user) {
         const { data: profile, error } = await supabase
           .from('profiles')
@@ -240,6 +244,8 @@ export default function VendorManagementApp() {
     setSelectedItem(null);
   };
 
+  
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -254,6 +260,9 @@ export default function VendorManagementApp() {
     }
     if (authView === 'forgot-password') {
       return <ForgotPasswordScreen onSwitchToLogin={() => setAuthView('login')} />;
+    }
+    if (authView === 'update-password') {
+      return <UpdatePasswordScreen onPasswordUpdated={() => setAuthView('login')} />;
     }
     return <LoginScreen onLogin={handleLogin} onSwitchToSignUp={() => setAuthView('signup')} onSwitchToForgotPassword={() => setAuthView('forgot-password')} />;
   }
