@@ -192,12 +192,13 @@ export default function VendorManagementApp() {
   const [selectedItem, setSelectedItem] = useState<RFQ | Vendor | Quote | Order | null>(null);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setAuthView('update-password');
-        setLoading(false);
-        return;
-      }
+    // If the URL hash contains 'type=recovery', the user is coming from a password reset link.
+    // We should immediately show them the update password screen.
+    if (window.location.hash.includes('type=recovery')) {
+      setAuthView('update-password');
+    }
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         const { data: profile, error } = await supabase
           .from('profiles')
@@ -207,7 +208,14 @@ export default function VendorManagementApp() {
 
         if (error) {
           console.error('Error fetching profile:', error);
-          setCurrentUser(null);
+          // Create a minimal user object even if profile fetch fails, so the UI doesn't get stuck.
+          setCurrentUser({
+            id: session.user.id,
+            email: session.user.email!,
+            role: 'vendor', // default role
+            name: session.user.email!,
+            avatarUrl: '',
+          });
         } else if (profile) {
           const user: User = {
             id: profile.id,
@@ -219,7 +227,10 @@ export default function VendorManagementApp() {
           setCurrentUser(user);
         }
       } else {
-        setCurrentUser(null);
+        // If there's no session, and we're not in the middle of a password update, clear the user.
+        if (!window.location.hash.includes('type=recovery')) {
+            setCurrentUser(null);
+        }
       }
       setLoading(false);
     });
@@ -254,6 +265,16 @@ export default function VendorManagementApp() {
     );
   }
 
+  // If we are in the password update flow, show that screen first, regardless of other states.
+  if (authView === 'update-password') {
+    return <UpdatePasswordScreen onPasswordUpdated={() => {
+      setAuthView('login');
+      // Clear the URL hash to prevent the update screen from showing again on refresh
+      window.history.replaceState(null, '', ' ');
+    }} />;
+  }
+
+  // If there's no user, show the appropriate auth screen.
   if (!currentUser) {
     if (authView === 'signup') {
       return <SignUpScreen onSignUpSuccess={() => setAuthView('login')} onSwitchToLogin={() => setAuthView('login')} />;
@@ -261,9 +282,7 @@ export default function VendorManagementApp() {
     if (authView === 'forgot-password') {
       return <ForgotPasswordScreen onSwitchToLogin={() => setAuthView('login')} />;
     }
-    if (authView === 'update-password') {
-      return <UpdatePasswordScreen onPasswordUpdated={() => setAuthView('login')} />;
-    }
+    // Default to login screen
     return <LoginScreen onLogin={handleLogin} onSwitchToSignUp={() => setAuthView('signup')} onSwitchToForgotPassword={() => setAuthView('forgot-password')} />;
   }
 
