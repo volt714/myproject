@@ -9,10 +9,11 @@ interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   setCurrentUser: (user: User | null) => void;
+  isPinned: boolean;
+  setIsPinned: (isPinned: boolean) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentUser, activeTab, setActiveTab, setCurrentUser }) => {
-  const [isPinned, setIsPinned] = useState(true);
+const Sidebar: React.FC<SidebarProps> = ({ currentUser, activeTab, setActiveTab, setCurrentUser, isPinned, setIsPinned }) => {
 
   type MenuItem = {
     id: string;
@@ -48,7 +49,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentUser, activeTab, setActiveTab,
   };
 
   return (
-    <div className={`bg-white min-h-screen shadow-lg border-r border-gray-200 flex flex-col relative transition-all duration-300 ${isPinned ? 'w-64' : 'w-20'}`}>
+        <div className={`bg-white h-screen shadow-lg border-r border-gray-200 flex flex-col fixed top-0 left-0 z-50 transition-all duration-300 ${isPinned ? 'w-64' : 'w-20'}`}>
       {/* Header */}
       <div className="p-6 border-b border-gray-200 flex items-center justify-between">
         {isPinned && (

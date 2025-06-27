@@ -43,6 +43,12 @@ export interface FormData {
   needsLighting: string;
   lightingWidth: string;
   powerPointDistance: string;
+  safetyCurtainNeeded: string;
+  safetyCurtainLength: string;
+  safetyCurtainWidth: string;
+  safetyCurtainHeight: string;
+  protectionType: string;
+  towerLampNeeded: string;
 }
 
 export interface PLCProjectFormProps {

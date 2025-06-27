@@ -184,6 +184,7 @@ export default function VendorManagementApp() {
   const [loading, setLoading] = useState(true);
   const [authView, setAuthView] = useState<'login' | 'signup' | 'forgot-password' | 'update-password'>('login');
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isSidebarPinned, setIsSidebarPinned] = useState(true);
   const [rfqs] = useState<RFQ[]>(sampleRfqs);
   const [quotes] = useState<Quote[]>(sampleQuotes);
   const [vendors] = useState<Vendor[]>(sampleVendors);
@@ -293,8 +294,10 @@ export default function VendorManagementApp() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         setCurrentUser={setCurrentUser}
+        isPinned={isSidebarPinned}
+        setIsPinned={setIsSidebarPinned}
       />
-      <main className="flex-1 p-8">
+      <main className={`flex-1 p-8 transition-all duration-300 ${isSidebarPinned ? 'ml-64' : 'ml-20'}`}>
         {activeTab === 'dashboard' && (
           <Dashboard currentUser={currentUser} rfqs={rfqs} quotes={quotes} vendors={vendors} orders={orders} />
         )}
