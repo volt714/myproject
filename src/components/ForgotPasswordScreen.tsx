@@ -17,8 +17,12 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ onSwitchToL
     setError('');
     setIsLoading(true);
 
+    const redirectTo = process.env.NODE_ENV === 'development'
+      ? 'http://localhost:3000/'
+      : window.location.origin;
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin, // You might want to redirect to a specific password update page
+      redirectTo: redirectTo,
     });
 
     if (error) {

@@ -26,9 +26,7 @@ export default function UpdatePasswordScreen({ onPasswordUpdated }: { onPassword
       setError(error.message);
     } else {
       setMessage('Your password has been updated successfully.');
-      setTimeout(() => {
-        onPasswordUpdated();
-      }, 2000);
+      onPasswordUpdated();
     }
     setLoading(false);
   };
