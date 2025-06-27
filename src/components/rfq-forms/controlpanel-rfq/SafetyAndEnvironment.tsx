@@ -204,14 +204,8 @@ const SafetyAndEnvironment: React.FC<SafetyAndEnvironmentProps> = ({
         />
 
         {formData.safetyCurtainNeeded === 'yes' && (
-          <div className="grid lg:grid-cols-3 gap-8 animate-in slide-in-from-left duration-200">
-            <NumberInput
-              label="Safety Curtain Length (mm)"
-              value={formData.safetyCurtainLength}
-              onChange={(value) => handleChange('safetyCurtainLength', value)}
-              placeholder="Enter length"
-              required
-            />
+          <div className="grid lg:grid-cols-2 gap-8 animate-in slide-in-from-left duration-200">
+
             <NumberInput
               label="Safety Curtain Width (mm)"
               value={formData.safetyCurtainWidth}
@@ -230,15 +224,17 @@ const SafetyAndEnvironment: React.FC<SafetyAndEnvironmentProps> = ({
         )}
       </div>
 
-      <div className="border-t border-gray-200 pt-8 space-y-8">
-        <SelectField
-          label="Protection Type"
-          value={formData.protectionType}
-          onChange={(value) => handleChange('protectionType', value)}
-          options={protectionTypeOptions}
-          required
-        />
-      </div>
+      {formData.safetyCurtainNeeded === 'yes' && (
+        <div className="border-t border-gray-200 pt-8 space-y-8">
+          <SelectField
+            label="Protection Type"
+            value={formData.protectionType}
+            onChange={(value) => handleChange('protectionType', value)}
+            options={protectionTypeOptions}
+            required
+          />
+        </div>
+      )}
 
       <div className="border-t border-gray-200 pt-8 space-y-8">
         <RadioGroup
