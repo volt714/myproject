@@ -231,7 +231,7 @@ const ColorDropdown: React.FC<{
   const selectedOption = COLOR_OPTIONS.find(option => option.value === value) || COLOR_OPTIONS[0];
 
   return (
-    <div className="relative w-48">
+    <div className="relative w-48" aria-invalid={!!error}>
       <button
         id={colorFieldId}
         type="button"
@@ -248,7 +248,6 @@ const ColorDropdown: React.FC<{
           ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
         `}
         disabled={disabled}
-        aria-invalid={!!error}
         aria-describedby={error ? `${colorFieldId}-error` : undefined}
         aria-expanded={isOpen}
         aria-haspopup="listbox"

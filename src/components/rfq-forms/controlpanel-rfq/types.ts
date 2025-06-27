@@ -48,6 +48,15 @@ export interface FormData {
   safetyCurtainHeight: string;
   protectionType: string;
   towerLampNeeded: string;
+  plcModel: string;
+  digitalInputs: string;
+  digitalOutputs: string;
+  analogIOs: string;
+  hmiRequired: string;
+  hmiType: string;
+  hmiScreenSize: string;
+  communicationProtocol: string;
+  databaseType: string;
 }
 
 export interface PLCProjectFormProps {

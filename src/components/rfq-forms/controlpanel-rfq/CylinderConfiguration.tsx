@@ -3,7 +3,7 @@ import { FormData, ValveDetails, AdditionalSensorDetails } from './types';
 
 interface CylinderConfigurationProps {
   formData: FormData;
-  handleChange: (field: keyof FormData, value: any) => void;
+  handleChange: (field: keyof FormData, value: string | number | ValveDetails[] | AdditionalSensorDetails[]) => void;
 }
 
 /**
@@ -121,7 +121,7 @@ const CylinderConfiguration: React.FC<CylinderConfigurationProps> = ({
     
     if (checked && formData.valveDetails.length > 0) {
       const firstValve = formData.valveDetails[0];
-      const newValveDetails = formData.valveDetails.map((valve, index) => ({
+      const newValveDetails = formData.valveDetails.map((valve) => ({
         ...firstValve,
         id: valve.id,
       }));
@@ -132,7 +132,7 @@ const CylinderConfiguration: React.FC<CylinderConfigurationProps> = ({
   // Effects for managing dynamic arrays
   useEffect(() => {
     if (formData.valveDetails.length !== valveCount) {
-      const newValveDetails: ValveDetails[] = Array.from({ length: valveCount }, (_, i) => ({
+      const newValveDetails = Array.from({ length: valveCount }, (_, i) => ({
         id: i + 1,
         valveType: formData.valveDetails[i]?.valveType || '',
         voltage: formData.valveDetails[i]?.voltage || '',

@@ -40,22 +40,7 @@ const ProjectOverview: React.FC<ProjectOverviewProps> = ({ formData, handleChang
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            PLC Brand Required *
-          </label>
-          <select
-            value={formData.plcBrand}
-            onChange={(e) => handleChange('plcBrand', e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">Select PLC Brand</option>
-            <option value="siemens">Siemens</option>
-            <option value="delta">Delta</option>
-            <option value="omron">Omron</option>
-            <option value="any">Any</option>
-          </select>
-        </div>
+
       </div>
     </section>
   );
