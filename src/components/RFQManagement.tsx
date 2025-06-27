@@ -1,8 +1,11 @@
 import React, { useState, useCallback, useMemo, FC } from 'react';
-import { Search, Plus, Eye, Edit, AlertCircle } from 'lucide-react';
+import { Search, Plus, AlertCircle, Eye, Edit } from 'lucide-react';
+import ControlPanelRfqForm from './rfq-forms/ControlPanelRfqForm';
+import MechanicalAssemblyRfqForm from './rfq-forms/MechanicalAssemblyRfqForm';
+import FixturesRfqForm from './rfq-forms/FixturesRfqForm';
 import { RFQ, RFQStatus, ModalType } from '@/types';
 
-export type FilterStatus = 'all' | 'open' | 'closed' | 'in_progress' | 'awarded';
+export type FilterStatus = 'all' | RFQStatus;
 
 interface RFQManagementProps {
   rfqs: RFQ[];
@@ -11,9 +14,6 @@ interface RFQManagementProps {
   error?: string | null;
 }
 
-/**
- * Status badge styling configuration
- */
 const STATUS_STYLES: Record<RFQStatus, string> = {
   'open': 'bg-green-100 text-green-800 border-green-200',
   'closed': 'bg-gray-100 text-gray-800 border-gray-200',
@@ -21,25 +21,30 @@ const STATUS_STYLES: Record<RFQStatus, string> = {
   'awarded': 'bg-blue-100 text-blue-800 border-blue-200',
 };
 
-/**
- * RFQ Management Component
- * 
- * A professional React component for managing Request for Quotation (RFQ) records.
- * Features include search, filtering, and CRUD operations with proper accessibility.
- */
 const RFQManagement: FC<RFQManagementProps> = ({
   rfqs = [],
   onOpenModal,
   isLoading = false,
   error = null,
 }) => {
-  // Local state
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+  const [currentView, setCurrentView] = useState<'list' | 'control-panel' | 'mechanical-assembly' | 'fixtures'>('list');
+  
+  // RFQ types that can be created
+  const rfqTypes = [
+    { id: 'control-panel', label: 'Control Panel' },
+    { id: 'mechanical-assembly', label: 'Mechanical Assembly' },
+    { id: 'fixtures', label: 'Fixtures' },
+    // Add more types here as needed
+  ] as const;
+  
+  const handleRfqTypeSelect = useCallback((typeId: 'control-panel' | 'mechanical-assembly' | 'fixtures') => {
+    setIsDropdownOpen(false);
+    setCurrentView(typeId);
+  }, []);
 
-  /**
-   * Memoized filtered RFQs based on search term and status filter
-   */
   const filteredRfqs = useMemo(() => {
     if (!Array.isArray(rfqs)) return [];
 
@@ -51,34 +56,20 @@ const RFQManagement: FC<RFQManagementProps> = ({
       
       const matchesFilter = 
         filterStatus === 'all' || 
-        rfq.status?.toLowerCase() === filterStatus.toLowerCase();
+        rfq.status === filterStatus;
       
       return matchesSearch && matchesFilter;
     });
   }, [rfqs, searchTerm, filterStatus]);
 
-  /**
-   * Opens modal with specified type and optional RFQ item
-   */
-
-
-  /**
-   * Handles search input changes
-   */
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   }, []);
 
-  /**
-   * Handles filter status changes
-   */
   const handleFilterChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     setFilterStatus(e.target.value as FilterStatus);
   }, []);
 
-  /**
-   * Formats currency values
-   */
   const formatCurrency = useCallback((amount: number): string => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -88,9 +79,6 @@ const RFQManagement: FC<RFQManagementProps> = ({
     }).format(amount);
   }, []);
 
-  /**
-   * Formats date strings
-   */
   const formatDate = useCallback((dateString: string): string => {
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
@@ -103,16 +91,22 @@ const RFQManagement: FC<RFQManagementProps> = ({
     }
   }, []);
 
-  /**
-   * Renders error state
-   */
+  if (currentView === 'control-panel') {
+    return <ControlPanelRfqForm onBack={() => setCurrentView('list')} />;
+  }
+
+  if (currentView === 'mechanical-assembly') {
+    return <MechanicalAssemblyRfqForm onBack={() => setCurrentView('list')} />;
+  }
+
+  if (currentView === 'fixtures') {
+    return <FixturesRfqForm onBack={() => setCurrentView('list')} />;
+  }
+
   if (error) {
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-800">RFQ Management</h2>
-        </div>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 flex items-center gap-3">
+      <div className="space-y-6 p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
           <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
           <div>
             <h3 className="font-medium text-red-800">Error Loading RFQs</h3>
@@ -124,29 +118,55 @@ const RFQManagement: FC<RFQManagementProps> = ({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header Section */}
+    <div className="space-y-6 p-4">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">RFQ Management</h1>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-gray-600">
             Manage your Request for Quotation records
           </p>
         </div>
-        <button
-          onClick={() => onOpenModal('createRfq')}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center gap-2 font-medium"
-          aria-label="Create new RFQ"
-        >
-          <Plus className="h-4 w-4" aria-hidden="true" />
-          Create RFQ
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center gap-2 font-medium"
+            aria-label="Create new RFQ"
+            aria-haspopup="true"
+            aria-expanded={isDropdownOpen}
+          >
+            <Plus className="h-4 w-4" />
+            Create RFQ
+          </button>
+          
+          {isDropdownOpen && (
+            <>
+              {/* Click outside handler */}
+              <div 
+                className="fixed inset-0 z-10" 
+                onClick={() => setIsDropdownOpen(false)}
+              />
+              
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-20">
+                <div className="py-1" role="menu" aria-orientation="vertical">
+                  {rfqTypes.map((type) => (
+                    <button
+                      key={type.id}
+                      onClick={() => handleRfqTypeSelect(type.id)}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                      role="menuitem"
+                    >
+                      {type.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Main Content Card */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        {/* Search and Filter Section */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-4 border-b border-gray-200">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <label htmlFor="search-rfqs" className="sr-only">
@@ -191,13 +211,12 @@ const RFQManagement: FC<RFQManagementProps> = ({
             </div>
           </div>
 
-          {/* Results Summary */}
           <div className="mt-4">
             <p className="text-sm text-gray-600">
               Showing {filteredRfqs.length} of {rfqs.length} RFQs
               {searchTerm && (
                 <span className="ml-1">
-                  matching &quot;{searchTerm}&quot;
+                  matching "{searchTerm}"
                 </span>
               )}
             </p>

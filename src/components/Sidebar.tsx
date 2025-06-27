@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
-import { FileText, DollarSign, Users, Package, Home, LogOut } from 'lucide-react';
+import { FileText, DollarSign, Users, Package, Home, LogOut, ChevronLeft } from 'lucide-react';
 import { User } from '@/types';
 import { supabase } from '@/utils/supabaseClient';
 
@@ -12,13 +12,15 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ currentUser, activeTab, setActiveTab, setCurrentUser }) => {
-  type MenuItem = {
-  id: string;
-  label: string;
-  icon: React.ElementType;
-};
+  const [isPinned, setIsPinned] = useState(true);
 
-const menuItems: MenuItem[] = [
+  type MenuItem = {
+    id: string;
+    label: string;
+    icon: React.ElementType;
+  };
+
+  const menuItems: MenuItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'rfqs', label: 'RFQ Management', icon: FileText },
     { id: 'quotes', label: 'Quote Comparison', icon: DollarSign },
@@ -46,12 +48,25 @@ const menuItems: MenuItem[] = [
   };
 
   return (
-    <div className="bg-white w-64 min-h-screen shadow-lg border-r border-gray-200 flex flex-col">
+    <div className={`bg-white min-h-screen shadow-lg border-r border-gray-200 flex flex-col relative transition-all duration-300 ${isPinned ? 'w-64' : 'w-20'}`}>
       {/* Header */}
-      <div className="p-6 border-b border-gray-200">
-        <h1 className="text-xl font-bold text-gray-800">Vendor Portal</h1>
-        <p className="text-sm text-gray-600 capitalize">{currentUser?.role} Panel</p>
+      <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+        {isPinned && (
+          <div className='overflow-hidden'>
+            <h1 className="text-xl font-bold text-gray-800">Vendor Portal</h1>
+            <p className="text-sm text-gray-600 capitalize">{currentUser?.role} Panel</p>
+          </div>
+        )}
       </div>
+
+      {/* Pin Toggle Button */}
+      <button
+        onClick={() => setIsPinned(!isPinned)}
+        className="absolute top-6 right-[-12px] bg-white border-2 border-gray-200 rounded-full p-1.5 text-gray-600 hover:bg-gray-100 z-10"
+        aria-label={isPinned ? 'Unpin sidebar' : 'Pin sidebar'}
+      >
+        <ChevronLeft className={`h-4 w-4 transition-transform duration-300 ${isPinned ? '' : 'rotate-180'}`} />
+      </button>
 
       {/* Navigation Menu */}
       <nav className="p-4 flex-grow">
@@ -68,11 +83,11 @@ const menuItems: MenuItem[] = [
                     isActive
                       ? 'bg-blue-50 text-blue-700 font-semibold'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
-                  }`}
+                  } ${!isPinned && 'justify-center'}`}
                   aria-label={`Navigate to ${item.label}`}
                 >
-                  <Icon className="h-5 w-5" />
-                  {item.label}
+                  <Icon className="h-5 w-5 flex-shrink-0" />
+                  {isPinned && <span className="truncate">{item.label}</span>}
                 </button>
               </li>
             );
@@ -81,26 +96,28 @@ const menuItems: MenuItem[] = [
       </nav>
 
       {/* User Profile Section */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="flex items-center gap-3 mb-4">
+      <div className="p-4 border-t border-gray-200 overflow-hidden">
+        <div className={`flex items-center gap-3 mb-4 ${!isPinned && 'justify-center'}`}>
           {currentUser?.avatarUrl ? (
-            <Image src={currentUser.avatarUrl} alt={currentUser.name} width={40} height={40} className="rounded-full" />
+            <Image src={currentUser.avatarUrl} alt={currentUser.name || 'user-avatar'} width={40} height={40} className="rounded-full flex-shrink-0" />
           ) : (
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
               {getUserInitial(currentUser?.name)}
             </div>
           )}
-          <div>
-            <p className="text-sm font-semibold text-gray-800">{currentUser?.name}</p>
-            <p className="text-xs text-gray-600 capitalize">{getRoleDisplayName(currentUser?.role)}</p>
-          </div>
+          {isPinned && (
+            <div className='overflow-hidden'>
+              <p className="text-sm font-semibold text-gray-800 truncate">{currentUser?.name}</p>
+              <p className="text-xs text-gray-600 capitalize">{getRoleDisplayName(currentUser?.role)}</p>
+            </div>
+          )}
         </div>
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-red-600 hover:bg-red-50 transition-colors"
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-red-600 hover:bg-red-50 transition-colors ${!isPinned && 'justify-center'}`}
         >
-          <LogOut className="h-5 w-5" />
-          Sign Out
+          <LogOut className="h-5 w-5 flex-shrink-0" />
+          {isPinned && <span className='truncate'>Sign Out</span>}
         </button>
       </div>
     </div>
