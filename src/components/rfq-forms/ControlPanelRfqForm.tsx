@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Save, FileText } from 'lucide-react';
-import { FormData, PLCProjectFormProps } from './controlpanel-rfq/types';
+import { FormData, PLCProjectFormProps, ValveDetails, AdditionalSensorDetails } from './controlpanel-rfq/types';
 import ProjectOverview from './controlpanel-rfq/ProjectOverview';
 import IntegrationRequirements from './controlpanel-rfq/IntegrationRequirements';
 import OperationRequirements from './controlpanel-rfq/OperationRequirements';
@@ -8,6 +8,10 @@ import CylinderConfiguration from './controlpanel-rfq/CylinderConfiguration';
 import ActuatorConfiguration from './controlpanel-rfq/ActuatorConfiguration';
 import Dimensions from './controlpanel-rfq/Dimensions';
 import SafetyAndEnvironment from './controlpanel-rfq/SafetyAndEnvironment';
+// Import the enhanced PLC configuration
+import EnhancedPLCConfiguration from './controlpanel-rfq/EnhancedPLCConfiguration';
+import HMIRequiredField from './controlpanel-rfq/HMIRequiredField';
+import HMIConfiguration from './controlpanel-rfq/HMIConfiguration';
 
 const ControlPanelRfqForm: React.FC<PLCProjectFormProps> = ({ onBack }) => {
   const [formData, setFormData] = useState<FormData>({
@@ -39,15 +43,40 @@ const ControlPanelRfqForm: React.FC<PLCProjectFormProps> = ({ onBack }) => {
     operatingEnvironment: '',
     needsLighting: '',
     lightingWidth: '',
-    powerPointDistance: ''
+    powerPointDistance: '',
+    safetyCurtainNeeded: '',
+    safetyCurtainWidth: '',
+    safetyCurtainHeight: '',
+    protectionType: '',
+    towerLampNeeded: '',
+    plcModel: '',
+    digitalInputs: '0',
+    digitalOutputs: '0',
+    analogIOs: '0',
+    ioList: [],
+    plcProgram: {
+      id: '',
+      name: 'New Program',
+      steps: [],
+      totalSteps: 0,
+      ioList: [],
+      created: new Date(),
+      modified: new Date()
+    },
+    hmiRequired: '',
+    hmiType: '',
+    hmiScreenSize: '',
+    hmiScreenLayout: [],
+    communicationProtocol: '',
+    databaseType: ''
   });
 
-  const handleChange = (field: keyof FormData, value: string) => {
+  const handleChange = useCallback((field: keyof FormData, value: string | number | string[] | ValveDetails[] | AdditionalSensorDetails[]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
-  };
+  }, []);
 
   const showCylinderSection = formData.hasClampingOperation === 'yes' && 
     (formData.actuatorType === 'cylinders' || formData.actuatorType === 'both');
@@ -87,6 +116,17 @@ const ControlPanelRfqForm: React.FC<PLCProjectFormProps> = ({ onBack }) => {
       {showActuatorSection && <ActuatorConfiguration formData={formData} handleChange={handleChange} />}
       <Dimensions formData={formData} handleChange={handleChange} />
       <SafetyAndEnvironment formData={formData} handleChange={handleChange} />
+      
+      <section className="space-y-8">
+        <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-blue-200 pb-2">
+          PLC & HMI Configuration
+        </h2>
+        <EnhancedPLCConfiguration formData={formData} handleChange={handleChange} />
+        <HMIRequiredField formData={formData} handleChange={handleChange} />
+        {formData.hmiRequired === 'yes' && (
+          <HMIConfiguration formData={formData} handleChange={handleChange} />
+        )}
+      </section>
 
       {/* Actions */}
       <div className="flex justify-end items-center gap-4 pt-8 border-t border-gray-200">

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormData } from './types';
+import HMIImageGallery from './HMIImageGallery';
 
 interface HMIConfigurationProps {
   formData: FormData;
@@ -35,6 +36,22 @@ const HMIConfiguration: React.FC<HMIConfigurationProps> = ({ formData, handleCha
     'CC-Link',
     'Other'
   ];
+
+  // Initialize selectedImages from formData
+  const [selectedImages, setSelectedImages] = useState<string[]>(() => 
+    Array.isArray(formData.hmiScreenLayout) ? formData.hmiScreenLayout : []
+  );
+
+  // Update form data when selectedImages changes
+  useEffect(() => {
+    if (JSON.stringify(formData.hmiScreenLayout) !== JSON.stringify(selectedImages)) {
+      // Use type assertion to handle the array type for hmiScreenLayout
+      (handleChange as (field: keyof FormData, value: any) => void)('hmiScreenLayout', selectedImages);
+    }
+    // We're intentionally excluding handleChange from dependencies to prevent infinite loops
+    // The handleChange is already memoized in the parent component
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedImages]);
 
   return (
     <div className="space-y-8 mt-8">
@@ -95,6 +112,15 @@ const HMIConfiguration: React.FC<HMIConfigurationProps> = ({ formData, handleCha
               ))}
             </select>
           </div>
+        </div>
+      )}
+
+      {formData.hmiRequired === 'yes' && (
+        <div className="mt-8">
+          <HMIImageGallery 
+            selectedImages={selectedImages}
+            onSelectImages={setSelectedImages}
+          />
         </div>
       )}
     </div>

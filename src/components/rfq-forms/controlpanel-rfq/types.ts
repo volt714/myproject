@@ -13,10 +13,20 @@ export interface AdditionalSensorDetails {
   customPhysicalTypeName: string;
 }
 
+import { IOPoint, PLCProgram } from './plc-types';
+
 export interface FormData {
   projectTitle: string;
   projectDescription: string;
+  // PLC Configuration
   plcBrand: string;
+  plcModel: string;
+  digitalInputs: string;
+  digitalOutputs: string;
+  analogIOs: string;
+  ioList: IOPoint[];
+  plcProgram: PLCProgram;
+  // End PLC Configuration
   integrationType: string;
   hasClampingOperation: string;
   needsPrecisionMovement: string;
@@ -48,13 +58,10 @@ export interface FormData {
   safetyCurtainHeight: string;
   protectionType: string;
   towerLampNeeded: string;
-  plcModel: string;
-  digitalInputs: string;
-  digitalOutputs: string;
-  analogIOs: string;
   hmiRequired: string;
   hmiType: string;
   hmiScreenSize: string;
+  hmiScreenLayout: string[];
   communicationProtocol: string;
   databaseType: string;
 }
