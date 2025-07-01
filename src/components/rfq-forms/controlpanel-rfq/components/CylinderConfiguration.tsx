@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { FormData, ValveDetails, AdditionalSensorDetails } from './types';
+import { FormData, ValveDetails, AdditionalSensorDetails } from '../types/types';
 
 interface CylinderConfigurationProps {
   formData: FormData;

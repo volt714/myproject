@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
-import { PLCStep, InstructionType, LogicalOperator } from '../plc-types';
+import { PLCStep, InstructionType, LogicalOperator } from '../../types/plc-types';
 import { usePLCContext } from './PLCProvider';
 
 interface InstructionStepProps {

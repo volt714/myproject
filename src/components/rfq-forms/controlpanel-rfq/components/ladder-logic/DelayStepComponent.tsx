@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
-import { PLCStep, InstructionType, TimerUnit } from '../plc-types';
+import { PLCStep, InstructionType, TimerUnit } from '../../types/plc-types';
 import { usePLCContext } from './PLCProvider';
 
 interface DelayStepProps {

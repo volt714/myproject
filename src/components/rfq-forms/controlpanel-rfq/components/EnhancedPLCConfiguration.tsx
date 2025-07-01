@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FormData } from './types';
-import { IOPoint, PLCStep, PLCProgram } from './plc-types';
+import { FormData } from '../types/types';
+import { IOPoint, PLCStep, PLCProgram } from '../types/plc-types';
 import { v4 as uuidv4 } from 'uuid';
 import LadderLogicEditor from './ladder-logic/LadderLogicEditor';
 import { PLCProvider } from './ladder-logic/PLCProvider';

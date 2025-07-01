@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { PLCStep, InstructionType, LogicalOperator, IOPoint, PLCElement, TimerUnit } from '../plc-types';
+import { PLCStep, InstructionType, LogicalOperator, IOPoint, PLCElement, TimerUnit } from '../../types/plc-types';
 
 // --- Helper Functions for deep state manipulation ---
 

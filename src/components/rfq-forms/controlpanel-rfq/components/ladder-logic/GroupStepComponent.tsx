@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Plus, Trash2, ChevronRight, ChevronUp } from 'lucide-react';
-import { PLCStep, InstructionType } from '../plc-types';
+import { PLCStep, InstructionType } from '../../types/plc-types';
 import StepComponent from './StepComponent';
 import { usePLCContext } from './PLCProvider';
 

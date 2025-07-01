@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FormData } from './types';
+import { FormData } from '../types/types';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 interface HMIImageGalleryProps {

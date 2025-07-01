@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FormData } from './types';
+import { FormData } from '../types/types';
 import HMIImageGallery from './HMIImageGallery';
 
 interface HMIConfigurationProps {

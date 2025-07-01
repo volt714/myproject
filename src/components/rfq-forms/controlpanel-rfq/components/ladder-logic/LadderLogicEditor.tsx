@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { Plus, FolderPlus, Save, Loader2, ChevronDown } from 'lucide-react';
-import { PLCStep } from '../plc-types';
+import { PLCStep } from '../../types/plc-types';
 import { usePLCContext } from './PLCProvider';
 import StepComponent from './StepComponent';
 import GroupStepComponent from './GroupStepComponent';
