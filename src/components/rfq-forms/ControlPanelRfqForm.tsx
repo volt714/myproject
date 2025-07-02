@@ -1,17 +1,17 @@
 import React, { useState, useCallback } from 'react';
 import { Save, FileText } from 'lucide-react';
-import { FormData, PLCProjectFormProps, ValveDetails, AdditionalSensorDetails } from './controlpanel-rfq/types/types';
-import ProjectOverview from './controlpanel-rfq/components/ProjectOverview';
-import IntegrationRequirements from './controlpanel-rfq/components/IntegrationRequirements';
-import OperationRequirements from './controlpanel-rfq/components/OperationRequirements';
-import CylinderConfiguration from './controlpanel-rfq/components/CylinderConfiguration';
-import ActuatorConfiguration from './controlpanel-rfq/components/ActuatorConfiguration';
-import Dimensions from './controlpanel-rfq/components/Dimensions';
-import SafetyAndEnvironment from './controlpanel-rfq/components/SafetyAndEnvironment';
+import { FormData, PLCProjectFormProps, ValveDetails, AdditionalSensorDetails, PLCProgram, IOPoint } from './controlpanel-rfq/types/types';
+import ProjectOverview from './controlpanel-rfq/components/shared/ProjectOverview';
+import IntegrationRequirements from './controlpanel-rfq/components/requirements/IntegrationRequirements';
+import OperationRequirements from './controlpanel-rfq/components/requirements/OperationRequirements';
+import CylinderConfiguration from './controlpanel-rfq/components/actuator/CylinderConfiguration';
+import ActuatorConfiguration from './controlpanel-rfq/components/actuator/ActuatorConfiguration';
+import Dimensions from './controlpanel-rfq/components/shared/Dimensions';
+import SafetyAndEnvironment from './controlpanel-rfq/components/requirements/SafetyAndEnvironment';
 // Import the enhanced PLC configuration
-import EnhancedPLCConfiguration from './controlpanel-rfq/components/EnhancedPLCConfiguration';
-import HMIRequiredField from './controlpanel-rfq/components/HMIRequiredField';
-import HMIConfiguration from './controlpanel-rfq/components/HMIConfiguration';
+import EnhancedPLCConfiguration from './controlpanel-rfq/components/plc/EnhancedPLCConfiguration';
+import HMIRequiredField from './controlpanel-rfq/components/hmi/HMIRequiredField';
+import HMIConfiguration from './controlpanel-rfq/components/hmi/HMIConfiguration';
 
 const ControlPanelRfqForm: React.FC<PLCProjectFormProps> = ({ onBack }) => {
   const [formData, setFormData] = useState<FormData>({
@@ -71,7 +71,7 @@ const ControlPanelRfqForm: React.FC<PLCProjectFormProps> = ({ onBack }) => {
     databaseType: ''
   });
 
-  const handleChange = useCallback((field: keyof FormData, value: string | number | string[] | ValveDetails[] | AdditionalSensorDetails[]) => {
+  const handleChange = useCallback((field: keyof FormData, value: string | number | string[] | ValveDetails[] | AdditionalSensorDetails[] | PLCProgram | IOPoint[] | null) => {
     setFormData((prev: FormData) => ({
       ...prev,
       [field]: value
@@ -86,7 +86,7 @@ const ControlPanelRfqForm: React.FC<PLCProjectFormProps> = ({ onBack }) => {
 
   const generateSummary = () => {
     const summary = Object.entries(formData)
-      .filter(([key, value]) => value !== '')
+      .filter(([, value]) => value !== '')
       .map(([key, value]) => `${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}: ${value}`)
       .join('\n');
     

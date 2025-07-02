@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Plus, Trash2, ChevronRight, ChevronUp } from 'lucide-react';
 import { PLCStep, InstructionType } from '@/components/rfq-forms/controlpanel-rfq/types/plc-types';
 import StepComponent from './StepComponent';
-import { usePLCContext } from '@/components/rfq-forms/controlpanel-rfq/components/ladder-logic/PLCProvider';
+import { usePLCContext } from '../context/PLCProvider';
 
 interface GroupStepProps {
   step: PLCStep;
@@ -13,13 +13,13 @@ const GroupStepComponent: React.FC<GroupStepProps> = ({
   step,
   isReadOnly = false
 }) => {
-  const { handlers } = usePLCContext();
+  const { handlers, config } = usePLCContext();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isGroupNameFocused, setIsGroupNameFocused] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const groupNameRef = useRef<HTMLInputElement>(null);
 
-  const stepCount = step.groupSteps?.length || 0;
+  const stepCount = step.children?.length || 0;
   const hasSteps = stepCount > 0;
 
   useEffect(() => {
@@ -57,7 +57,7 @@ const GroupStepComponent: React.FC<GroupStepProps> = ({
     handlers.removeStep(step.id);
   };
 
-  const instructions = ['INPUT', 'OUTPUT', 'TIMER', 'COUNTER', 'GROUP', 'DELAY'];
+  
 
   return (
     <div className="border-l-4 border-blue-500 bg-blue-50/30 rounded-r-lg mb-4">
@@ -90,16 +90,18 @@ const GroupStepComponent: React.FC<GroupStepProps> = ({
             
             {step.showDropdown && (
               <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-20 min-w-[140px]">
-                {instructions.map((instruction: string, index: number) => (
+                {config.instructions.map((instruction: string) => (
                   <button
                     key={instruction}
                     onClick={() => {
-                      handlers.updateStepType(step.id, instruction as InstructionType);
+                      if (Object.values(InstructionType).includes(instruction as InstructionType)) {
+                        handlers.updateStepType(step.id, instruction as InstructionType);
+                      }
                       handlers.toggleStepDropdown(step.id);
                     }}
                     className="block w-full px-3 py-2 text-left text-sm hover:bg-blue-50 focus:bg-blue-50 focus:outline-none first:rounded-t-md last:rounded-b-md"
                     role="option"
-                    tabIndex={index}
+                    aria-selected={step.type === instruction}
                   >
                     {instruction}
                   </button>
@@ -158,14 +160,14 @@ const GroupStepComponent: React.FC<GroupStepProps> = ({
         <div className="p-4">
           {hasSteps ? (
             <div className="space-y-4">
-              {step.groupSteps?.map((s) => (
+              {step.children?.map((s: PLCStep) => (
                 <StepComponent key={s.id} step={s} />
               ))}
             </div>
           ) : (
             <div className="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
               <p className="text-gray-500">This group is empty.</p>
-              <p className="text-sm text-gray-400 mt-1">Click "Add Step" to add a step to this group.</p>
+              <p className="text-sm text-gray-400 mt-1">Click &quot;Add Step&quot; to add a step to this group.</p>
             </div>
           )}
         </div>

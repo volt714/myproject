@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FormData } from '../types/types';
+import { FormData } from '../../types/types';
 import HMIImageGallery from './HMIImageGallery';
 
 interface HMIConfigurationProps {
   formData: FormData;
-  handleChange: (field: keyof FormData, value: string) => void;
+  handleChange: (field: keyof FormData, value: string | string[]) => void;
 }
 
 const HMIConfiguration: React.FC<HMIConfigurationProps> = ({ formData, handleChange }) => {
@@ -46,7 +46,7 @@ const HMIConfiguration: React.FC<HMIConfigurationProps> = ({ formData, handleCha
   useEffect(() => {
     if (JSON.stringify(formData.hmiScreenLayout) !== JSON.stringify(selectedImages)) {
       // Use type assertion to handle the array type for hmiScreenLayout
-      (handleChange as (field: keyof FormData, value: any) => void)('hmiScreenLayout', selectedImages);
+      handleChange('hmiScreenLayout', selectedImages);
     }
     // We're intentionally excluding handleChange from dependencies to prevent infinite loops
     // The handleChange is already memoized in the parent component

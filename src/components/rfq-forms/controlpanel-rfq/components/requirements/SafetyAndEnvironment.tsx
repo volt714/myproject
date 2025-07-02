@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormData } from '../types/types';
+import { FormData } from '../../types/types';
 
 interface SafetyAndEnvironmentProps {
   formData: FormData;
@@ -72,7 +72,7 @@ const SafetyAndEnvironment: React.FC<SafetyAndEnvironmentProps> = ({
     options: Array<{ value: string; label: string }>;
     required?: boolean;
     placeholder?: string;
-  }> = ({ label, value, onChange, options, required = false, placeholder }) => (
+  }> = ({ label, value, onChange, options, required = false }) => (
     <div className="space-y-2">
       <label className="block text-sm font-semibold text-gray-700">
         {label}

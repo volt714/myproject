@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useMemo, FC } from 'react';
 import { Search, Plus, AlertCircle, Eye, Edit } from 'lucide-react';
-import ControlPanelRfqForm from './rfq-forms/ControlPanelRfqForm';
-import MechanicalAssemblyRfqForm from './rfq-forms/MechanicalAssemblyRfqForm';
-import FixturesRfqForm from './rfq-forms/FixturesRfqForm';
+import ControlPanelRfqForm from '../rfq-forms/ControlPanelRfqForm';
+import MechanicalAssemblyRfqForm from '../rfq-forms/MechanicalAssemblyRfqForm';
+import FixturesRfqForm from '../rfq-forms/FixturesRfqForm';
 import { RFQ, RFQStatus, ModalType } from '@/types';
 
 export type FilterStatus = 'all' | RFQStatus;
@@ -216,7 +216,7 @@ const RFQManagement: FC<RFQManagementProps> = ({
               Showing {filteredRfqs.length} of {rfqs.length} RFQs
               {searchTerm && (
                 <span className="ml-1">
-                  matching "{searchTerm}"
+                  matching &quot;{searchTerm}&quot;
                 </span>
               )}
             </p>

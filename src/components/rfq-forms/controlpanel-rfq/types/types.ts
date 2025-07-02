@@ -14,6 +14,7 @@ export interface AdditionalSensorDetails {
 }
 
 import { IOPoint, PLCProgram } from './plc-types';
+export type { IOPoint, PLCProgram };
 
 export interface FormData {
   projectTitle: string;

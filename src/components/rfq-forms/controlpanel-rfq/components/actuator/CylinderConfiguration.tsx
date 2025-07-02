@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { FormData, ValveDetails, AdditionalSensorDetails } from '../types/types';
+import { FormData, ValveDetails, AdditionalSensorDetails } from '../../types/types';
 
 interface CylinderConfigurationProps {
   formData: FormData;
@@ -18,10 +18,7 @@ const CylinderConfiguration: React.FC<CylinderConfigurationProps> = ({
 
   // Memoized computed values
   const valveCount = useMemo(() => parseInt(formData.valveCount) || 0, [formData.valveCount]);
-  const additionalSensorCount = useMemo(() => 
-    parseInt(formData.additionalSensorCount) || 0, 
-    [formData.additionalSensorCount]
-  );
+  const additionalSensorCount = useMemo(() => parseInt(formData.additionalSensorCount) || 0, [formData.additionalSensorCount]);
 
   // Configuration options
   const valveTypeOptions = [
@@ -74,11 +71,7 @@ const CylinderConfiguration: React.FC<CylinderConfigurationProps> = ({
     handleChange('reedSwitchPositions', (count * 2).toString());
   }, [handleChange]);
 
-  const handleValveChange = useCallback((
-    index: number, 
-    field: keyof ValveDetails, 
-    value: string
-  ) => {
+  const handleValveChange = useCallback((index: number, field: keyof ValveDetails, value: string) => {
     const newValveDetails = [...formData.valveDetails];
     let finalValue = value;
 
@@ -106,11 +99,7 @@ const CylinderConfiguration: React.FC<CylinderConfigurationProps> = ({
     handleChange(field, num.toString());
   }, [handleChange]);
 
-  const handleSensorChange = useCallback((
-    index: number, 
-    field: keyof AdditionalSensorDetails, 
-    value: string
-  ) => {
+  const handleSensorChange = useCallback((index: number, field: keyof AdditionalSensorDetails, value: string) => {
     const newSensorDetails = [...formData.additionalSensorDetails];
     newSensorDetails[index] = { ...newSensorDetails[index], [field]: value };
     handleChange('additionalSensorDetails', newSensorDetails);
@@ -257,6 +246,92 @@ const CylinderConfiguration: React.FC<CylinderConfigurationProps> = ({
     </div>
   );
 
+  const renderValveInputs = (valve: ValveDetails, index: number) => (
+    <div className="grid lg:grid-cols-3 gap-6">
+      {renderFormField(
+        'Valve Type',
+        renderSelect(
+          valve.valveType,
+          (value) => handleValveChange(index, 'valveType', value),
+          valveTypeOptions,
+          sameAsFirst && index > 0
+        ),
+        true
+      )}
+
+      {renderFormField(
+        'Voltage',
+        renderSelect(
+          valve.voltage,
+          (value) => handleValveChange(index, 'voltage', value),
+          voltageOptions,
+          sameAsFirst && index > 0
+        ),
+        true
+      )}
+
+      {renderFormField(
+        'Solenoid Coil Watts',
+        renderInput(
+          'number',
+          valve.solenoidWatts,
+          (value) => handleValveChange(index, 'solenoidWatts', value),
+          'Enter watts',
+          sameAsFirst && index > 0
+        ),
+        true
+      )}
+    </div>
+  );
+
+  const renderAdditionalSensorInputs = (sensor: AdditionalSensorDetails, index: number) => (
+    <div className="grid lg:grid-cols-2 gap-6">
+      {renderFormField(
+        'Signal Type',
+        <>
+          {renderSelect(
+            sensor.sensorSignalType,
+            (value) => handleSensorChange(index, 'sensorSignalType', value),
+            sensorSignalTypeOptions
+          )}
+          {sensor.sensorSignalType === 'custom' && (
+            <div className="mt-3">
+              {renderInput(
+                'text',
+                sensor.customSignalTypeName,
+                (value) => handleSensorChange(index, 'customSignalTypeName', value),
+                'Enter custom signal type'
+              )}
+            </div>
+          )}
+        </>,
+        true
+      )}
+
+      {renderFormField(
+        'Physical Type',
+        <>
+          {renderSelect(
+            sensor.sensorPhysicalType,
+            (value) => handleSensorChange(index, 'sensorPhysicalType', value),
+            sensorPhysicalTypeOptions
+          )}
+          {sensor.sensorPhysicalType === 'custom' && (
+            <div className="mt-3">
+              {renderInput(
+                'text',
+                sensor.customPhysicalTypeName,
+                (value) => handleSensorChange(index, 'customPhysicalTypeName', value),
+                'Enter custom physical type'
+              )}
+            </div>
+          )}
+        </>,
+        true
+      )}
+    </div>
+  );
+
   return (
     <section className="bg-gradient-to-br from-slate-50 to-blue-50 p-8 rounded-xl shadow-sm border border-gray-200">
       <div className="mb-8">
@@ -315,7 +390,7 @@ const CylinderConfiguration: React.FC<CylinderConfigurationProps> = ({
       )}
 
       {/* Valve Details */}
-      {formData.valveDetails.map((valve, index) => (
+      {formData.valveDetails.map((valve: ValveDetails, index: number) => (
         <div key={valve.id} className="mb-8 p-6 bg-white rounded-lg border border-gray-200 shadow-sm">
           <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
             <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full mr-3">
@@ -323,42 +398,7 @@ const CylinderConfiguration: React.FC<CylinderConfigurationProps> = ({
             </span>
             Valve {index + 1} Configuration
           </h3>
-          
-          <div className="grid lg:grid-cols-3 gap-6">
-            {renderFormField(
-              'Valve Type',
-              renderSelect(
-                valve.valveType,
-                (value) => handleValveChange(index, 'valveType', value),
-                valveTypeOptions,
-                sameAsFirst && index > 0
-              ),
-              true
-            )}
-
-            {renderFormField(
-              'Voltage',
-              renderSelect(
-                valve.voltage,
-                (value) => handleValveChange(index, 'voltage', value),
-                voltageOptions,
-                sameAsFirst && index > 0
-              ),
-              true
-            )}
-
-            {renderFormField(
-              'Solenoid Coil Watts',
-              renderInput(
-                'number',
-                valve.solenoidWatts,
-                (value) => handleValveChange(index, 'solenoidWatts', value),
-                'Enter watts',
-                sameAsFirst && index > 0
-              ),
-              true
-            )}
-          </div>
+          {renderValveInputs(valve, index)}
         </div>
       ))}
 
@@ -453,7 +493,7 @@ const CylinderConfiguration: React.FC<CylinderConfigurationProps> = ({
 
         {/* Additional Sensor Details */}
         {formData.needsAdditionalSensors === 'yes' && 
-         formData.additionalSensorDetails.map((sensor, index) => (
+         formData.additionalSensorDetails.map((sensor: AdditionalSensorDetails, index: number) => (
           <div key={sensor.id} className="mt-6 p-5 bg-gray-50 rounded-lg border border-gray-200">
             <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <span className="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full mr-3">
@@ -462,51 +502,7 @@ const CylinderConfiguration: React.FC<CylinderConfigurationProps> = ({
               Additional Sensor {index + 1}
             </h4>
             
-            <div className="grid lg:grid-cols-2 gap-6">
-              {renderFormField(
-                'Signal Type',
-                <>
-                  {renderSelect(
-                    sensor.sensorSignalType,
-                    (value) => handleSensorChange(index, 'sensorSignalType', value),
-                    sensorSignalTypeOptions
-                  )}
-                  {sensor.sensorSignalType === 'custom' && (
-                    <div className="mt-3">
-                      {renderInput(
-                        'text',
-                        sensor.customSignalTypeName,
-                        (value) => handleSensorChange(index, 'customSignalTypeName', value),
-                        'Enter custom signal type'
-                      )}
-                    </div>
-                  )}
-                </>,
-                true
-              )}
-
-              {renderFormField(
-                'Physical Type',
-                <>
-                  {renderSelect(
-                    sensor.sensorPhysicalType,
-                    (value) => handleSensorChange(index, 'sensorPhysicalType', value),
-                    sensorPhysicalTypeOptions
-                  )}
-                  {sensor.sensorPhysicalType === 'custom' && (
-                    <div className="mt-3">
-                      {renderInput(
-                        'text',
-                        sensor.customPhysicalTypeName,
-                        (value) => handleSensorChange(index, 'customPhysicalTypeName', value),
-                        'Enter custom physical type'
-                      )}
-                    </div>
-                  )}
-                </>,
-                true
-              )}
-            </div>
+            {renderAdditionalSensorInputs(sensor, index)}
           </div>
         ))}
       </div>

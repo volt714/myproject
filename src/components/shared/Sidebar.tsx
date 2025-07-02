@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import { FileText, DollarSign, Users, Package, Home, LogOut, ChevronLeft } from 'lucide-react';
 import { User } from '@/types';

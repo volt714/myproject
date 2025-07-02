@@ -1,7 +1,22 @@
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
-import { PLCStep, InstructionType, LogicalOperator } from '@/components/rfq-forms/controlpanel-rfq/types/plc-types';
-import { usePLCContext } from '@/components/rfq-forms/controlpanel-rfq/components/ladder-logic/PLCProvider';
+import { PLCStep, InstructionType, LogicalOperator, IOType, StructuralInstructionType } from '@/components/rfq-forms/controlpanel-rfq/types/plc-types';
+import { usePLCContext } from '../context/PLCProvider';
+
+// Helper functions to check instruction types
+const isInputInstruction = (type: InstructionType | StructuralInstructionType): boolean => {
+  return [InstructionType.XIC, InstructionType.XIO].includes(type as InstructionType);
+};
+
+const getInstructionIOType = (type: InstructionType | StructuralInstructionType): IOType | null => {
+  if ([InstructionType.XIC, InstructionType.XIO].includes(type as InstructionType)) {
+    return 'INPUT';
+  }
+  if ([InstructionType.OTE, InstructionType.OTL, InstructionType.OTU].includes(type as InstructionType)) {
+    return 'OUTPUT';
+  }
+  return null;
+};
 
 interface InstructionStepProps {
   step: PLCStep;
@@ -22,7 +37,8 @@ const InstructionStepComponent: React.FC<InstructionStepProps> = ({ step }) => {
     toggleElementValue
   } = stepHandlers;
 
-  const availableIOPoints = ioList.filter(p => p.type === step.type);
+  const instructionIOType = getInstructionIOType(step.type);
+  const availableIOPoints = instructionIOType ? ioList.filter(p => p.type === instructionIOType) : [];
 
   const handleCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const count = parseInt(e.target.value, 10);
@@ -44,7 +60,6 @@ const InstructionStepComponent: React.FC<InstructionStepProps> = ({ step }) => {
         {step.showDropdown && (
           <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-20 min-w-[120px]">
             {instructions
-              .filter(inst => ['INPUT', 'OUTPUT'].includes(inst))
               .map((instruction) => (
               <button
                 key={instruction}
@@ -78,7 +93,7 @@ const InstructionStepComponent: React.FC<InstructionStepProps> = ({ step }) => {
                   <span>{element.label}</span>
                   <ChevronDown className="w-3 h-3" />
                 </button>
-                {step[`showLabelDropdown-element-${element.id}`] && (
+                {Boolean(step[`showLabelDropdown-element-${element.id}`]) && (
                   <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 min-w-full">
                     {availableIOPoints.map((ioPoint) => (
                       <button
@@ -103,7 +118,7 @@ const InstructionStepComponent: React.FC<InstructionStepProps> = ({ step }) => {
               </button>
             </div>
 
-            {step.type === 'INPUT' && index < step.elements.length - 1 && (
+            {isInputInstruction(step.type) && index < step.elements.length - 1 && (
               <div className="relative ml-2">
                 <select
                   value={step.operators?.[index] || 'AND'}

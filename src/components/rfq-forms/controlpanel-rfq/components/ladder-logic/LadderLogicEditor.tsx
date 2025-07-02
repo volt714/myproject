@@ -1,19 +1,17 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Plus, FolderPlus, Save, Loader2, ChevronDown } from 'lucide-react';
-import { PLCStep } from '@/components/rfq-forms/controlpanel-rfq/types/plc-types';
-import { usePLCContext } from '@/components/rfq-forms/controlpanel-rfq/components/ladder-logic/PLCProvider';
-import StepComponent from './StepComponent';
-import GroupStepComponent from './GroupStepComponent';
-import ErrorBoundary from './ErrorBoundary';
+import { Plus, Loader2, ChevronDown } from 'lucide-react';
+import { InstructionType } from '@/components/rfq-forms/controlpanel-rfq/types/plc-types';
+import { usePLCContext } from './context/PLCProvider';
+import StepComponent from './step-components/StepComponent';
+import GroupStepComponent from './step-components/GroupStepComponent';
+import ErrorBoundary from './utils/ErrorBoundary';
 
 interface LadderLogicEditorProps {
   className?: string;
-  onSave?: (steps: PLCStep[]) => void;
 }
 
 const LadderLogicEditor: React.FC<LadderLogicEditorProps> = ({
   className = '',
-  onSave,
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { steps, handlers } = usePLCContext();
@@ -24,7 +22,7 @@ const LadderLogicEditor: React.FC<LadderLogicEditorProps> = ({
   }, []);
 
   const handleAddStep = useCallback(() => {
-    handlers.addStep('OUTPUT');
+    handlers.addStep(InstructionType.OTE);
   }, [handlers]);
 
   const handleAddGroup = useCallback(() => {

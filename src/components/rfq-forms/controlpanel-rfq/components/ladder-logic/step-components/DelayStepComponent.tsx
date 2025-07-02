@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
 import { PLCStep, InstructionType, TimerUnit } from '@/components/rfq-forms/controlpanel-rfq/types/plc-types';
-import { usePLCContext } from '@/components/rfq-forms/controlpanel-rfq/components/ladder-logic/PLCProvider';
+import { usePLCContext } from '../context/PLCProvider';
 
 interface DelayStepProps {
   step: PLCStep;

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { PLCStep, InstructionType, LogicalOperator, IOPoint, PLCElement, TimerUnit } from '../../types/plc-types';
+import { PLCStep, InstructionType, LogicalOperator, IOPoint, PLCElement, TimerUnit, StructuralInstructionType } from '../../../types/plc-types';
 
 // --- Helper Functions for deep state manipulation ---
 
@@ -10,8 +10,8 @@ const mapStepsRecursively = (
 ): PLCStep[] => {
   return steps.map((step) => {
     const newStep = { ...step };
-    if (newStep.groupSteps) {
-      newStep.groupSteps = mapStepsRecursively(newStep.groupSteps, callback);
+    if (newStep.children) {
+      newStep.children = mapStepsRecursively(newStep.children, callback);
     }
     return callback(newStep);
   });
@@ -26,10 +26,10 @@ const updateStepRecursively = (
     if (step.id === id) {
       return updateFn(step);
     }
-    if (step.groupSteps) {
+    if (step.children) {
       return {
         ...step,
-        groupSteps: updateStepRecursively(step.groupSteps, id, updateFn),
+        children: updateStepRecursively(step.children, id, updateFn),
       };
     }
     return step;
@@ -53,18 +53,23 @@ interface PLCContextType {
   ioList: IOPoint[];
   config: {
     instructions: string[];
+    instructionTypes: InstructionType[];
     logicalOperators: string[];
     timerUnits: string[];
   };
   handlers: {
-    addStep: (type: InstructionType | string, parentId?: string) => void;
+    addStep: (type: InstructionType | StructuralInstructionType, parentId?: string) => void;
     removeStep: (id: string) => void;
     addGroup: () => void;
     addStepToGroup: (groupId: string) => void;
     updateGroupName: (id: string, name: string) => void;
     toggleStepDropdown: (id: string) => void;
     updateStepType: (id: string, newType: InstructionType) => void;
-    updateStepValue: (id: string, value: any, elementId?: string) => void;
+    updateStepValue: (
+      id: string,
+      value: boolean | number | string,
+      elementId?: string
+    ) => void;
     setSteps: (steps: PLCStep[]) => void;
   };
   stepHandlers: StepHandlers;
@@ -109,82 +114,88 @@ export const PLCProvider: React.FC<PLCProviderProps> = ({
 
   // --- Handlers ---
 
-  const addStep = (type: InstructionType | string, parentId?: string) => {
+  const addStep = useCallback((type: InstructionType | StructuralInstructionType, parentId?: string) => {
     const newElement: PLCElement = {
-        id: uuidv4(),
-        type: 'CONTACT',
-        label: 'New Element',
-        value: false,
+      id: uuidv4(),
+      type: 'CONTACT',
+      label: 'New Element',
+      value: false,
     };
 
     const newStep: PLCStep = {
       id: uuidv4(),
-      stepNumber: 0, // Will be renumbered
-      type: type as InstructionType,
-      enabled: true,
+      type: type,
       elements: type === 'GROUP' ? [] : [newElement],
-      ...(type === 'DELAY' && { value: 1000, unit: 'ms' }),
-      ...(type === 'LOOP START' && { loopStart: 0 }),
+      children: type === 'GROUP' ? [] : undefined,
     };
 
     let newSteps;
     if (parentId) {
       newSteps = updateStepRecursively(steps, parentId, (group) => ({
         ...group,
-        groupSteps: [...(group.groupSteps || []), newStep],
+        children: [...(group.children || []), newStep],
       }));
     } else {
       newSteps = [...steps, newStep];
     }
 
-    // Renumber all steps
-    let counter = 1;
-    const renumberedSteps = mapStepsRecursively(newSteps, (step) => ({
-      ...step,
-      stepNumber: counter++,
-    }));
-
-    setSteps(renumberedSteps);
-    handleProgramChange(renumberedSteps);
-  };
-
-  const removeStep = (id: string) => {
-    const removeRecursively = (stepsToRemoveFrom: PLCStep[]): PLCStep[] => {
-      return stepsToRemoveFrom.filter(step => {
-        if (step.id === id) return false;
-        if (step.groupSteps) {
-          step.groupSteps = removeRecursively(step.groupSteps);
-        }
-        return true;
-      });
-    };
-    const newSteps = removeRecursively([...steps]);
     setSteps(newSteps);
     handleProgramChange(newSteps);
-  };
+  }, [steps, handleProgramChange]);
 
-  const addGroup = () => addStep('GROUP');
-  const addStepToGroup = (groupId: string) => addStep('OUTPUT', groupId);
+  const removeStep = useCallback((id: string) => {
+    const removeRecursively = (stepsToRemoveFrom: PLCStep[]): PLCStep[] => {
+      return stepsToRemoveFrom.reduce((acc, step) => {
+        if (step.id === id) {
+          return acc;
+        }
+        if (step.children) {
+          const newChildren = removeRecursively(step.children);
+          acc.push({ ...step, children: newChildren });
+        } else {
+          acc.push(step);
+        }
+        return acc;
+      }, [] as PLCStep[]);
+    };
+    const newSteps = removeRecursively(steps);
+    setSteps(newSteps);
+    handleProgramChange(newSteps);
+  }, [steps, handleProgramChange]);
 
-  const updateStepProperty = (id: string, props: Partial<PLCStep>) => {
+  const addGroup = useCallback(() => {
+    addStep('GROUP');
+  }, [addStep]);
+
+  const addStepToGroup = useCallback((groupId: string) => {
+    addStep(InstructionType.OTE, groupId);
+  }, [addStep]);
+
+  const updateStepProperty = useCallback((id: string, props: Partial<PLCStep>) => {
     const newSteps = updateStepRecursively(steps, id, (step) => ({ ...step, ...props }));
     setSteps(newSteps);
     handleProgramChange(newSteps);
-  };
+  }, [steps, handleProgramChange]);
 
-  const updateGroupName = (id: string, name: string) => updateStepProperty(id, { groupName: name });
-  const updateStepType = (id: string, newType: InstructionType) => updateStepProperty(id, { type: newType, showDropdown: false });
-  const toggleStepDropdown = (id: string) => {
+  const updateGroupName = useCallback((id: string, name: string) => {
+    updateStepProperty(id, { name: name });
+  }, [updateStepProperty]);
+
+  const updateStepType = useCallback((id: string, newType: InstructionType) => {
+    updateStepProperty(id, { type: newType, showDropdown: false });
+  }, [updateStepProperty]);
+
+  const toggleStepDropdown = useCallback((id: string) => {
     const newSteps = mapStepsRecursively(steps, (step) => ({
       ...step,
       showDropdown: step.id === id ? !step.showDropdown : false,
     }));
     setSteps(newSteps);
-  };
+  }, [steps]);
 
-  const updateStepValue = (stepId: string, value: any, elementId?: string) => {
+  const updateStepValue = useCallback((stepId: string, value: boolean | number | string, elementId?: string) => {
       const newSteps = updateStepRecursively(steps, stepId, (step) => {
-          const newElements = step.elements.map(el => {
+          const newElements = step.elements.map((el: PLCElement) => {
               if (!elementId || el.id === elementId) {
                   return {...el, value: value};
               }
@@ -194,9 +205,9 @@ export const PLCProvider: React.FC<PLCProviderProps> = ({
       });
       setSteps(newSteps);
       handleProgramChange(newSteps);
-  };
+  }, [steps, handleProgramChange]);
   
-  const toggleElementValue = (stepId: string, elementIndex: number, value: boolean) => {
+  const toggleElementValue = useCallback((stepId: string, elementIndex: number, value: boolean) => {
     const newSteps = updateStepRecursively(steps, stepId, (step) => {
       const newElements = [...step.elements];
       if (newElements[elementIndex]) {
@@ -206,9 +217,9 @@ export const PLCProvider: React.FC<PLCProviderProps> = ({
     });
     setSteps(newSteps);
     handleProgramChange(newSteps);
-  };
+  }, [steps, handleProgramChange]);
 
-  const updateStepOperator = (id: string, index: number, operator: LogicalOperator) => {
+  const updateStepOperator = useCallback((id: string, index: number, operator: LogicalOperator) => {
     const newSteps = updateStepRecursively(steps, id, (step) => {
       const newOperators = [...(step.operators || [])];
       newOperators[index] = operator;
@@ -216,9 +227,9 @@ export const PLCProvider: React.FC<PLCProviderProps> = ({
     });
     setSteps(newSteps);
     handleProgramChange(newSteps);
-  };
+  }, [steps, handleProgramChange]);
 
-  const updateElementIOPoint = (stepId: string, elementIndex: number, ioPoint: IOPoint) => {
+  const updateElementIOPoint = useCallback((stepId: string, elementIndex: number, ioPoint: IOPoint) => {
     const newSteps = updateStepRecursively(steps, stepId, (step) => {
       const newElements = [...step.elements];
       if (newElements[elementIndex]) {
@@ -232,17 +243,17 @@ export const PLCProvider: React.FC<PLCProviderProps> = ({
     });
     setSteps(newSteps);
     handleProgramChange(newSteps);
-  };
+  }, [steps, handleProgramChange]);
 
-  const toggleLabelDropdown = (stepId: string, dropdownKey: string) => {
+  const toggleLabelDropdown = useCallback((stepId: string, dropdownKey: string) => {
     const newSteps = updateStepRecursively(steps, stepId, (step) => ({
       ...step,
       [dropdownKey]: !step[dropdownKey],
     }));
     setSteps(newSteps);
-  };
+  }, [steps]);
 
-  const updateElementUnit = (stepId: string, elementIndex: number, unit: TimerUnit) => {
+  const updateElementUnit = useCallback((stepId: string, elementIndex: number, unit: TimerUnit) => {
     const newSteps = updateStepRecursively(steps, stepId, (step) => {
       const newElements = [...step.elements];
       if (newElements[elementIndex]) {
@@ -255,13 +266,13 @@ export const PLCProvider: React.FC<PLCProviderProps> = ({
     });
     setSteps(newSteps);
     handleProgramChange(newSteps);
-  };
+  }, [steps, handleProgramChange]);
 
-  const updateLoopStart = (id: string, count: number) => {
+  const updateLoopStart = useCallback((id: string, count: number) => {
     updateStepProperty(id, { loopStart: count });
-  };
+  }, [updateStepProperty]);
 
-  const updateElementCount = (id: string, count: number) => {
+  const updateElementCount = useCallback((id: string, count: number) => {
     const newSteps = updateStepRecursively(steps, id, (step) => {
       const currentCount = step.elements.length;
       let newElements = [...step.elements];
@@ -272,7 +283,7 @@ export const PLCProvider: React.FC<PLCProviderProps> = ({
             id: uuidv4(), 
             label: `I/O ${currentCount + i + 1}`, 
             value: false,
-            type: step.type === 'INPUT' ? 'INPUT' : 'OUTPUT',
+            type: step.type === InstructionType.XIC || step.type === InstructionType.XIO ? 'INPUT' : 'OUTPUT',
           });
         }
       } else if (count < currentCount) {
@@ -284,15 +295,22 @@ export const PLCProvider: React.FC<PLCProviderProps> = ({
 
     setSteps(newSteps);
     handleProgramChange(newSteps);
-  };
+  }, [steps, handleProgramChange]);
 
   const contextValue: PLCContextType = {
     steps,
     ioList,
     config: {
-      instructions: ['INPUT', 'OUTPUT', 'TIMER', 'GROUP', 'DELAY', 'LOOP START', 'LOOP END'],
-      logicalOperators: ['AND', 'OR'],
-      timerUnits: ['ms', 's'],
+      instructions: Object.values(InstructionType).filter(
+        (v) => typeof v === 'string'
+      ),
+      instructionTypes: Object.values(InstructionType).filter(
+        (v) => typeof v === 'string'
+      ) as InstructionType[],
+      logicalOperators: Object.values(LogicalOperator).filter(
+        (v) => typeof v === 'string'
+      ),
+      timerUnits: Object.values(TimerUnit).filter((v) => typeof v === 'string'),
     },
     handlers: {
       addStep,
@@ -306,13 +324,13 @@ export const PLCProvider: React.FC<PLCProviderProps> = ({
       setSteps,
     },
     stepHandlers: {
-      toggleElementValue,
       updateStepOperator,
       updateElementIOPoint,
       toggleLabelDropdown,
       updateElementUnit,
       updateLoopStart,
       updateElementCount,
+      toggleElementValue,
     },
   };
 

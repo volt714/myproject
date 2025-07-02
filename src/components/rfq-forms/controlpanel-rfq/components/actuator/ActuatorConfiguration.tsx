@@ -1,12 +1,12 @@
 import React from 'react';
-import { FormData, ValveDetails, AdditionalSensorDetails } from '../types/types';
+import { FormData, ValveDetails, AdditionalSensorDetails } from '../../types/types';
 
 interface ActuatorConfigurationProps {
   formData: FormData;
   handleChange: (field: keyof FormData, value: string | number | string[] | ValveDetails[] | AdditionalSensorDetails[]) => void;
 }
 
-const ActuatorConfiguration: React.FC<ActuatorConfigurationProps> = ({ formData, handleChange }) => {
+const ActuatorConfiguration: React.FC<ActuatorConfigurationProps> = () => {
   return (
     <section className="space-y-6 bg-blue-50 p-6 rounded-lg">
       <h2 className="text-2xl font-semibold text-gray-800 border-b-2 border-blue-200 pb-2">

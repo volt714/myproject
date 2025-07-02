@@ -35,7 +35,7 @@ export interface PLCStep {
   loopEnd?: number;
   groupSteps?: PLCStep[];
   groupName?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface IOPoint {
@@ -45,7 +45,7 @@ export interface IOPoint {
   label: string;
   description?: string;
   dataType: 'BOOL' | 'INT' | 'REAL' | 'WORD' | string;
-  value?: any;
+  value?: string | number | boolean | null;
 }
 
 export interface PLCProgram {
@@ -90,5 +90,5 @@ export interface PLCEditorState {
   isRunning: boolean;
   currentStep: number;
   ioList: IOPoint[];
-  variables: Record<string, any>;
+  variables: Record<string, string | number | boolean | null>;
 }

@@ -1,7 +1,34 @@
 export type IOType = 'INPUT' | 'OUTPUT';
 export type IODataType = 'BOOL' | 'INT' | 'REAL' | 'STRING';
-export type LogicalOperator = 'AND' | 'OR' | 'NOT' | 'XOR';
-export type TimerUnit = 'ms' | 's';
+
+export enum InstructionType {
+  LOOP_START = 'LOOP_START',
+  LOOP_END = 'LOOP_END',
+  DELAY = 'DELAY',
+  XIC = 'XIC',
+  XIO = 'XIO',
+  OTE = 'OTE',
+  OTL = 'OTL',
+  OTU = 'OTU',
+  TON = 'TON',
+  TOF = 'TOF',
+  RTO = 'RTO',
+  CTU = 'CTU',
+  CTD = 'CTD',
+  RES = 'RES',
+}
+
+export enum LogicalOperator {
+  AND = 'AND',
+  OR = 'OR',
+  NOT = 'NOT',
+}
+
+export enum TimerUnit {
+  SEC = 'sec',
+  MIN = 'min',
+  HR = 'hr',
+}
 
 export interface IOPoint {
   id: string;
@@ -11,43 +38,33 @@ export interface IOPoint {
   description?: string;
   label?: string;
   address?: string;
-  value?: any;
+  value?: boolean | number | string;
 }
 
 export interface PLCElement {
   id: string;
   label: string;
-  value: any; // Supports boolean for I/O, number for timers, etc.
+  value: boolean | number | string; // Supports boolean for I/O, number for timers, etc.
   ioPointId?: string;
   type?: string;
   unit?: TimerUnit;
 }
 
-export type InstructionType =
-  | 'INPUT'
-  | 'OUTPUT'
-  | 'TIMER'
-
-  | 'DELAY'
-  | 'GROUP'
-  | 'LOOP_START'
-  | 'LOOP_END';
+export type StructuralInstructionType = 'GROUP';
 
 export interface PLCStep {
   id: string;
-  type: InstructionType;
+  type: InstructionType | StructuralInstructionType;
   elements: PLCElement[];
   operators?: LogicalOperator[];
   children?: PLCStep[];
   showDropdown?: boolean;
-
-
-  groupSteps?: PLCStep[];
   groupName?: string;
   stepNumber?: number;
   enabled?: boolean;
   loopStart?: number;
-  [key: string]: any; // For dynamic UI state
+  // Index signature for dynamic UI state properties like 'showLabelDropdown-element-...'
+  [key: string]: unknown;
 }
 
 export interface PLCProgram {

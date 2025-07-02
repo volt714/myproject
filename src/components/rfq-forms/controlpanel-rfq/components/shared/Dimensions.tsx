@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FormData } from '../types/types';
+import { FormData } from '../../types/types';
 
 interface DimensionsProps {
   formData: FormData;

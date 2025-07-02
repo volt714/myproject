@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { FormData } from '../types/types';
+import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
+
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 interface HMIImageGalleryProps {
@@ -20,23 +21,23 @@ const HMIImageGallery: React.FC<HMIImageGalleryProps> = ({ selectedImages, onSel
     { id: 'screen7', path: '/images/hmi/screen7.png', name: 'Screen 7' },
   ];
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     setCurrentIndex((prevIndex) => 
       prevIndex === hmiScreens.length - 1 ? 0 : prevIndex + 1
     );
-  };
+  }, [hmiScreens.length]);
 
-  const goToPrev = () => {
+  const goToPrev = useCallback(() => {
     setCurrentIndex((prevIndex) =>
       prevIndex === 0 ? hmiScreens.length - 1 : prevIndex - 1
     );
-  };
+  }, [hmiScreens.length]);
 
   // Auto-advance to next image every 5 seconds
   useEffect(() => {
     const timer = setInterval(goToNext, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [goToNext]);
 
   const toggleCurrentImageSelection = () => {
     const currentImagePath = hmiScreens[currentIndex].path;
@@ -61,7 +62,7 @@ const HMIImageGallery: React.FC<HMIImageGalleryProps> = ({ selectedImages, onSel
   );
 
   // Function to remove a selected screen
-  const removeSelectedScreen = (screenId: string, e: React.MouseEvent) => {
+  const removeSelectedScreen = (screenId: string, e: React.MouseEvent | React.KeyboardEvent) => {
     e.stopPropagation();
     const screen = hmiScreens.find(s => s.id === screenId);
     if (screen) {
@@ -94,10 +95,12 @@ const HMIImageGallery: React.FC<HMIImageGalleryProps> = ({ selectedImages, onSel
 
           {/* Main Image Display */}
           <div className="relative w-full aspect-video bg-gray-50 rounded-xl overflow-hidden shadow-lg">
-            <img
+            <Image
               src={currentScreen.path}
               alt={currentScreen.name}
-              className="w-full h-full object-contain p-4"
+              layout="fill"
+              objectFit="contain"
+              className="p-4"
             />
             
             {/* Image Info and Controls */}
@@ -170,7 +173,7 @@ const HMIImageGallery: React.FC<HMIImageGalleryProps> = ({ selectedImages, onSel
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.stopPropagation();
-                      removeSelectedScreen(screen.id, e as any);
+                      removeSelectedScreen(screen.id, e);
                     }
                   }}
                 >

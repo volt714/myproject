@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FormData } from '../types/types';
-import { IOPoint, PLCStep, PLCProgram } from '../types/plc-types';
+import { FormData } from '../../types/types';
+import { IOPoint, PLCStep, PLCProgram } from '../../types/plc-types';
 import { v4 as uuidv4 } from 'uuid';
-import LadderLogicEditor from './ladder-logic/LadderLogicEditor';
-import { PLCProvider } from './ladder-logic/PLCProvider';
-import IOListConfig from './ladder-logic/IOListConfig';
+import LadderLogicEditor from '../ladder-logic/LadderLogicEditor';
+import { PLCProvider } from '../ladder-logic/context/PLCProvider';
+import IOListConfig from '../ladder-logic/config/IOListConfig';
 
 interface EnhancedPLCConfigurationProps {
   formData: FormData;
-  handleChange: (field: keyof FormData, value: any) => void;
+  handleChange: (field: keyof FormData, value: string | IOPoint[] | PLCProgram | null) => void;
 }
 
 const EnhancedPLCConfiguration: React.FC<EnhancedPLCConfigurationProps> = ({ 
@@ -34,7 +34,7 @@ const EnhancedPLCConfiguration: React.FC<EnhancedPLCConfigurationProps> = ({
 
   useEffect(() => {
     handleChange('ioList', ioList);
-    setProgram(prev => ({...prev, ioList: ioList, modified: new Date().toISOString()}));
+    setProgram((prev: PLCProgram) => ({ ...prev, ioList: ioList, modified: new Date().toISOString()}));
   }, [ioList, handleChange]);
 
 

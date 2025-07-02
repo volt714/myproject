@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
 import { PLCStep, InstructionType } from '@/components/rfq-forms/controlpanel-rfq/types/plc-types';
-import { usePLCContext } from '@/components/rfq-forms/controlpanel-rfq/components/ladder-logic/PLCProvider';
+import { usePLCContext } from '../context/PLCProvider';
 
 interface LoopStepProps {
   step: PLCStep;
@@ -14,7 +14,7 @@ const LoopStepComponent: React.FC<LoopStepProps> = ({
   const { instructions } = config;
   const { toggleStepDropdown, updateStepType } = handlers;
   const { updateLoopStart } = stepHandlers;
-  const countValue = (step.elements[0]?.value as number) || 0;
+
 
   const handleLoopStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = parseInt(e.target.value, 10);
@@ -49,7 +49,7 @@ const LoopStepComponent: React.FC<LoopStepProps> = ({
         )}
       </div>
 
-      {step.type === 'LOOP_START' && (
+      {step.type === InstructionType.LOOP_START && (
         <div className="flex items-center space-x-2">
           <span className="text-sm font-medium">Cycle Count</span>
           <input
