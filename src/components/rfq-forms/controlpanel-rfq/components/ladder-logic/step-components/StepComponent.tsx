@@ -1,5 +1,5 @@
 import React from 'react';
-import { PLCStep, InstructionType, LogicalOperator } from '../types/plc';
+import { PLCStep } from '../types/plc';
 import DelayStepComponent from './DelayStepComponent';
 import InstructionStepComponent from './InstructionStepComponent';
 import LoopStepComponent from './CountStepComponent';

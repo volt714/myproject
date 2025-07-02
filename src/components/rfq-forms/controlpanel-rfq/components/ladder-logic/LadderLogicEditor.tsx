@@ -3,7 +3,7 @@ import useSWR from 'swr';
 import axios from 'axios';
 import { Plus } from 'lucide-react';
 import { usePLCState } from './hooks/usePLCState';
-import { instructions, logicalOperators } from './constants/plc';
+// Removed unused imports
 import TopToolbar, { ExportFormat } from './layout/TopToolbar';
 import StepComponent from './step-components/StepComponent';
 import GroupStepComponent from './step-components/GroupStepComponent';
@@ -19,7 +19,7 @@ const PLCProgrammer: React.FC = () => {
   const [projectName, setProjectName] = useState('Default Project');
   const [companyName, setCompanyName] = useState('Default Company');
 
-  const { data: labelOptions, error: labelsError } = useSWR<string[]>(
+  const { data: labelOptions } = useSWR<string[]>(
     () => `/api/labels?project_name=${projectName}&company_name=${companyName}`,
     fetcher,
     {
@@ -58,9 +58,14 @@ const PLCProgrammer: React.FC = () => {
     try {
       await axios.post(`/api/logic?project_name=${projectName}&company_name=${companyName}`, { steps });
       alert(`Project '${projectName}' saved successfully!`);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error saving project:', error);
-      const errorMessage = error.response?.data?.message || `Error: Could not save project '${projectName}'.`;
+      let errorMessage = `Error: Could not save project '${projectName}'.`;
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
       alert(errorMessage);
     }
   };
@@ -207,7 +212,7 @@ const PLCProgrammer: React.FC = () => {
 
   const handleExport = (format: ExportFormat) => {
     let content = '';
-    let fileExt = 'txt';
+    const fileExt = 'txt';
 
     if (plcModel === 'Codesys' && format === 'notes') {
       content = formatStepsForCodesys();

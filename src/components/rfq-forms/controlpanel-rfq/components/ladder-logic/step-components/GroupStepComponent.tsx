@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Plus, Trash2, ChevronRight, ChevronUp } from 'lucide-react';
-import { PLCStep, InstructionType, LogicalOperator } from '../types/plc';
+import { PLCStep, InstructionType } from '../types/plc';
 import StepComponent from './StepComponent';
 import { usePLCContext } from '../context/PLCContext';
 
@@ -13,7 +13,7 @@ const GroupStepComponent: React.FC<GroupStepProps> = ({
   step,
   isReadOnly = false
 }) => {
-  const { config, handlers, stepHandlers } = usePLCContext();
+  const { config, handlers } = usePLCContext();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isGroupNameFocused, setIsGroupNameFocused] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -102,6 +102,7 @@ const GroupStepComponent: React.FC<GroupStepProps> = ({
                     }}
                     className="block w-full px-3 py-2 text-left text-sm hover:bg-blue-50 focus:bg-blue-50 focus:outline-none first:rounded-t-md last:rounded-b-md"
                     role="option"
+                    aria-selected={instruction === step.type}
                     tabIndex={index}
                   >
                     {instruction}

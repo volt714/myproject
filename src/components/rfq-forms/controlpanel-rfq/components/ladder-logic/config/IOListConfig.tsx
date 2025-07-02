@@ -76,14 +76,14 @@ const PLCIOConfiguration: React.FC<PLCIOConfigurationProps> = ({ onBack, project
     });
   };
 
-  const validateForm = () => {
+  const validateForm = React.useCallback(() => {
     const isValid = newPoint.address.trim() && newPoint.label.trim();
     setShowValidation(!isValid && (newPoint.address.trim().length > 0 || newPoint.label.trim().length > 0));
-  };
+  }, [newPoint.address, newPoint.label]);
 
   useEffect(() => {
     validateForm();
-  }, [newPoint.address, newPoint.label]);
+  }, [validateForm, newPoint.address, newPoint.label]);
 
   if (error) return <div>Failed to load I/O list.</div>;
 

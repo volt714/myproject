@@ -16,7 +16,7 @@ export interface PLCStep {
     loopEnd?: number;
     groupSteps?: PLCStep[];
     groupName?: string;
-    [key: string]: any;
+    [key: string]: string | number | boolean | undefined | PLCStep[] | LogicalOperator[] | PLCElement[];
 }
   
 export interface PLCElement {
@@ -45,7 +45,7 @@ export interface IOPoint {
   label: string;
   description?: string;
   dataType: 'BOOL' | 'INT' | 'REAL' | 'WORD';
-  value?: any;
+  value?: string | number | boolean;
 }
   
 export interface PLCConnection {
@@ -71,7 +71,7 @@ export interface PLCRung {
 export interface SimulationState {
   isRunning: boolean;
   currentStep: number;
-  ioStates: Record<string, any>;
+  ioStates: Record<string, string | number | boolean | undefined>;
   executionTime: number;
   cycleTime: number;
 }

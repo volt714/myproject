@@ -346,10 +346,6 @@ export const usePLCState = (
     );
   };
 
-  const updateIOList = (newList: IOPoint[]): void => {
-    setIOList(newList);
-  };
-
   const getSavedRecipeNames = (): string[] => {
     const recipes = localStorage.getItem('plc-recipes');
     return recipes ? Object.keys(JSON.parse(recipes)) : [];

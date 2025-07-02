@@ -1,5 +1,5 @@
-import React, { createContext, useContext } from 'react';
-import { PLCStep, InstructionType, LogicalOperator } from '../types/plc';
+import { createContext, useContext } from 'react';
+import { InstructionType, LogicalOperator } from '../types/plc';
 
 interface GroupStepConfig {
   instructions: string[];

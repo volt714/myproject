@@ -10,7 +10,7 @@ const formatIOList = (ioList: IOPoint[], type: 'INPUT' | 'OUTPUT'): string => {
   return `${header}\n${variables}\n`;
 };
 
-export const formatStepsForCodesys = (steps: PLCStep[], ioList: IOPoint[], plcModel: string): string => {
+export const formatStepsForCodesys = (steps: PLCStep[], ioList: IOPoint[]): string => {
   let output = `PROGRAM PLC_PRG\n`;
   output += `VAR_GLOBAL\n`;
   output += formatIOList(ioList, 'INPUT');
