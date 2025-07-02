@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import useSWR from 'swr';
+import axios from 'axios';
 import { FormData } from '../../types/types';
 import { IOPoint, PLCStep, PLCProgram } from '../../types/plc-types';
 import { v4 as uuidv4 } from 'uuid';
 import LadderLogicEditor from '../ladder-logic/LadderLogicEditor';
 import { PLCProvider } from '../ladder-logic/context/PLCProvider';
 import IOListConfig from '../ladder-logic/config/IOListConfig';
+
+const fetcher = (url: string) => axios.get(url).then(res => res.data);
 
 interface EnhancedPLCConfigurationProps {
   formData: FormData;
@@ -16,8 +20,15 @@ const EnhancedPLCConfiguration: React.FC<EnhancedPLCConfigurationProps> = ({
   handleChange 
 }) => {
   const [activeTab, setActiveTab] = useState<'basic' | 'io' | 'programming'>('basic');
-  const [ioList, setIoList] = useState<IOPoint[]>(formData.ioList || []);
   
+  // Fetch IO list using SWR
+  const { data: ioList = [] } = useSWR<IOPoint[]>(
+    formData.projectName && formData.companyName 
+      ? `/api/io?project_name=${formData.projectName}&company_name=${formData.companyName}` 
+      : null,
+    fetcher
+  );
+
   const [program, setProgram] = useState<PLCProgram>(() => {
     const now = new Date().toISOString();
     return {
@@ -32,10 +43,15 @@ const EnhancedPLCConfiguration: React.FC<EnhancedPLCConfigurationProps> = ({
     };
   });
 
+  const ioListString = JSON.stringify(ioList);
   useEffect(() => {
-    handleChange('ioList', ioList);
-    setProgram((prev: PLCProgram) => ({ ...prev, ioList: ioList, modified: new Date().toISOString()}));
-  }, [ioList, handleChange]);
+    setProgram((prev) => {
+      if (JSON.stringify(prev.ioList) === ioListString) {
+        return prev;
+      }
+      return { ...prev, ioList: JSON.parse(ioListString), modified: new Date().toISOString() };
+    });
+  }, [ioListString]);
 
 
   const plcBrands = [
@@ -48,21 +64,19 @@ const EnhancedPLCConfiguration: React.FC<EnhancedPLCConfigurationProps> = ({
     'Other'
   ];
 
-  const handleIOListChange = (newList: IOPoint[]) => {
-    setIoList(newList);
-  };
-
   const handleProgramChange = useCallback((steps: PLCStep[]) => {
     const now = new Date().toISOString();
-    const updatedProgram: PLCProgram = {
-      ...program,
-      steps,
-      totalSteps: steps.length,
-      modified: now,
-    };
-    setProgram(updatedProgram);
-    handleChange('plcProgram', updatedProgram);
-  }, [program, handleChange]);
+    setProgram(currentProgram => {
+      const updatedProgram: PLCProgram = {
+        ...currentProgram,
+        steps,
+        totalSteps: steps.length,
+        modified: now,
+      };
+      handleChange('plcProgram', updatedProgram);
+      return updatedProgram;
+    });
+  }, [handleChange]);
 
   return (
     <div className="space-y-6">
@@ -169,7 +183,11 @@ const EnhancedPLCConfiguration: React.FC<EnhancedPLCConfigurationProps> = ({
         )}
 
         {activeTab === 'io' && (
-          <IOListConfig ioList={ioList} onIOListChange={handleIOListChange} />
+          <IOListConfig 
+            onBack={() => setActiveTab('basic')}
+            projectName={formData.projectName || ''}
+            companyName={formData.companyName || ''}
+          />
         )}
 
         {activeTab === 'programming' && (

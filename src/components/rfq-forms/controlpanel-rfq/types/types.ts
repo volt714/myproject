@@ -17,6 +17,8 @@ import { IOPoint, PLCProgram } from './plc-types';
 export type { IOPoint, PLCProgram };
 
 export interface FormData {
+  projectName?: string;
+  companyName?: string;
   projectTitle: string;
   projectDescription: string;
   // PLC Configuration
