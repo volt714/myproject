@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Plus, Trash2, ChevronRight, ChevronUp } from 'lucide-react';
-import { PLCStep, InstructionType } from '../../types/plc-types';
+import { PLCStep, InstructionType } from '@/components/rfq-forms/controlpanel-rfq/types/plc-types';
 import StepComponent from './StepComponent';
-import { usePLCContext } from './PLCProvider';
+import { usePLCContext } from '@/components/rfq-forms/controlpanel-rfq/components/ladder-logic/PLCProvider';
 
 interface GroupStepProps {
   step: PLCStep;

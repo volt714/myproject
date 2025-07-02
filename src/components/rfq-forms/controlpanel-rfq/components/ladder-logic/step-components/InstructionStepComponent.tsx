@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
-import { PLCStep, InstructionType, LogicalOperator } from '../../types/plc-types';
-import { usePLCContext } from './PLCProvider';
+import { PLCStep, InstructionType, LogicalOperator } from '@/components/rfq-forms/controlpanel-rfq/types/plc-types';
+import { usePLCContext } from '@/components/rfq-forms/controlpanel-rfq/components/ladder-logic/PLCProvider';
 
 interface InstructionStepProps {
   step: PLCStep;

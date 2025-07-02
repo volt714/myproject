@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { Plus, FolderPlus, Save, Loader2, ChevronDown } from 'lucide-react';
-import { PLCStep } from '../../types/plc-types';
-import { usePLCContext } from './PLCProvider';
+import { PLCStep } from '@/components/rfq-forms/controlpanel-rfq/types/plc-types';
+import { usePLCContext } from '@/components/rfq-forms/controlpanel-rfq/components/ladder-logic/PLCProvider';
 import StepComponent from './StepComponent';
 import GroupStepComponent from './GroupStepComponent';
 import ErrorBoundary from './ErrorBoundary';

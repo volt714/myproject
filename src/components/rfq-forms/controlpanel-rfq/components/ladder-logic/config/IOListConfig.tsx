@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Database } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { IOPoint } from '../../types/plc-types';
+import { IOPoint } from '@/components/rfq-forms/controlpanel-rfq/types/plc-types';
 
 interface IOListConfigProps {
   ioList: IOPoint[];

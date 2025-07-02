@@ -1,17 +1,17 @@
 import React, { useState, useCallback } from 'react';
 import { Save, FileText } from 'lucide-react';
-import { FormData, PLCProjectFormProps, ValveDetails, AdditionalSensorDetails } from './controlpanel-rfq/types';
-import ProjectOverview from './controlpanel-rfq/ProjectOverview';
-import IntegrationRequirements from './controlpanel-rfq/IntegrationRequirements';
-import OperationRequirements from './controlpanel-rfq/OperationRequirements';
-import CylinderConfiguration from './controlpanel-rfq/CylinderConfiguration';
-import ActuatorConfiguration from './controlpanel-rfq/ActuatorConfiguration';
-import Dimensions from './controlpanel-rfq/Dimensions';
-import SafetyAndEnvironment from './controlpanel-rfq/SafetyAndEnvironment';
+import { FormData, PLCProjectFormProps, ValveDetails, AdditionalSensorDetails } from './controlpanel-rfq/types/types';
+import ProjectOverview from './controlpanel-rfq/components/ProjectOverview';
+import IntegrationRequirements from './controlpanel-rfq/components/IntegrationRequirements';
+import OperationRequirements from './controlpanel-rfq/components/OperationRequirements';
+import CylinderConfiguration from './controlpanel-rfq/components/CylinderConfiguration';
+import ActuatorConfiguration from './controlpanel-rfq/components/ActuatorConfiguration';
+import Dimensions from './controlpanel-rfq/components/Dimensions';
+import SafetyAndEnvironment from './controlpanel-rfq/components/SafetyAndEnvironment';
 // Import the enhanced PLC configuration
-import EnhancedPLCConfiguration from './controlpanel-rfq/EnhancedPLCConfiguration';
-import HMIRequiredField from './controlpanel-rfq/HMIRequiredField';
-import HMIConfiguration from './controlpanel-rfq/HMIConfiguration';
+import EnhancedPLCConfiguration from './controlpanel-rfq/components/EnhancedPLCConfiguration';
+import HMIRequiredField from './controlpanel-rfq/components/HMIRequiredField';
+import HMIConfiguration from './controlpanel-rfq/components/HMIConfiguration';
 
 const ControlPanelRfqForm: React.FC<PLCProjectFormProps> = ({ onBack }) => {
   const [formData, setFormData] = useState<FormData>({
@@ -72,7 +72,7 @@ const ControlPanelRfqForm: React.FC<PLCProjectFormProps> = ({ onBack }) => {
   });
 
   const handleChange = useCallback((field: keyof FormData, value: string | number | string[] | ValveDetails[] | AdditionalSensorDetails[]) => {
-    setFormData(prev => ({
+    setFormData((prev: FormData) => ({
       ...prev,
       [field]: value
     }));
