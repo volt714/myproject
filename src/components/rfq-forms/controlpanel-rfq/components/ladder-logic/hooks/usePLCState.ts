@@ -83,7 +83,6 @@ export const usePLCState = (
   dynamicLabelOptions: string[]
 ) => {
   const [steps, setSteps] = useState<PLCStep[]>(initialState);
-  const [ioList, setIOList] = useState<IOPoint[]>([]);
 
   const addStepAtEnd = (type: InstructionType): void => {
     const newStep: PLCStep = {
@@ -399,7 +398,6 @@ export const usePLCState = (
   return {
     steps,
     setSteps,
-    ioList,
     addStep: addStepAtEnd,
     addGroup,
     removeStep,

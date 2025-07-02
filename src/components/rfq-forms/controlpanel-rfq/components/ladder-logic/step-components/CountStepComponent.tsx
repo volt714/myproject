@@ -14,7 +14,6 @@ const LoopStepComponent: React.FC<LoopStepProps> = ({
   const { instructions } = config;
   const { toggleStepDropdown, updateStepType } = handlers;
   const { updateLoopStart } = stepHandlers;
-  const countValue = (step.elements[0]?.value as number) || 0;
 
   const handleLoopStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = parseInt(e.target.value, 10);
