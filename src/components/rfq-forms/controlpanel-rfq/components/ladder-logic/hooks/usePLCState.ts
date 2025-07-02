@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { PLCStep, InstructionType, LogicalOperator, IOPoint } from '../types/plc';
+import { PLCStep, InstructionType, LogicalOperator } from '../types/plc';
 import { instructions, logicalOperators } from '../constants/plc';
 
 // Helper function to recursively map over all steps
