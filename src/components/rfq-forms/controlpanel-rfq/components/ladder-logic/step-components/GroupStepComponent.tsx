@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Plus, Trash2, ChevronRight, ChevronUp } from 'lucide-react';
-import { PLCStep, InstructionType } from '@/components/rfq-forms/controlpanel-rfq/types/plc-types';
+import { PLCStep, InstructionType, LogicalOperator } from '../types/plc';
 import StepComponent from './StepComponent';
-import { usePLCContext } from '../context/PLCProvider';
+import { usePLCContext } from '../context/PLCContext';
 
 interface GroupStepProps {
   step: PLCStep;
@@ -13,15 +13,16 @@ const GroupStepComponent: React.FC<GroupStepProps> = ({
   step,
   isReadOnly = false
 }) => {
-  const { handlers, config } = usePLCContext();
+  const { config, handlers, stepHandlers } = usePLCContext();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isGroupNameFocused, setIsGroupNameFocused] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const groupNameRef = useRef<HTMLInputElement>(null);
 
-  const stepCount = step.children?.length || 0;
+  const stepCount = step.groupSteps?.length || 0;
   const hasSteps = stepCount > 0;
 
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -35,6 +36,7 @@ const GroupStepComponent: React.FC<GroupStepProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [step.showDropdown, handlers, step.id]);
 
+  // Handle keyboard navigation in dropdown
   const handleDropdownKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Escape') {
       handlers.toggleStepDropdown(step.id);
@@ -57,12 +59,12 @@ const GroupStepComponent: React.FC<GroupStepProps> = ({
     handlers.removeStep(step.id);
   };
 
-  
-
   return (
     <div className="border-l-4 border-blue-500 bg-blue-50/30 rounded-r-lg mb-4">
+      {/* Group Header */}
       <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-transparent">
         <div className="flex items-center space-x-3">
+          {/* Collapse/Expand Button */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="p-1 hover:bg-blue-100 rounded transition-colors"
@@ -75,6 +77,7 @@ const GroupStepComponent: React.FC<GroupStepProps> = ({
             )}
           </button>
 
+          {/* Step Type Selector */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => handlers.toggleStepDropdown(step.id)}
@@ -90,18 +93,16 @@ const GroupStepComponent: React.FC<GroupStepProps> = ({
             
             {step.showDropdown && (
               <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-20 min-w-[140px]">
-                {config.instructions.map((instruction: string) => (
+                {config.instructions.map((instruction: string, index: number) => (
                   <button
                     key={instruction}
                     onClick={() => {
-                      if (Object.values(InstructionType).includes(instruction as InstructionType)) {
-                        handlers.updateStepType(step.id, instruction as InstructionType);
-                      }
+                      handlers.updateStepType(step.id, instruction as InstructionType);
                       handlers.toggleStepDropdown(step.id);
                     }}
                     className="block w-full px-3 py-2 text-left text-sm hover:bg-blue-50 focus:bg-blue-50 focus:outline-none first:rounded-t-md last:rounded-b-md"
                     role="option"
-                    aria-selected={step.type === instruction}
+                    tabIndex={index}
                   >
                     {instruction}
                   </button>
@@ -110,6 +111,7 @@ const GroupStepComponent: React.FC<GroupStepProps> = ({
             )}
           </div>
           
+          {/* Group Name Input */}
           <div className="relative">
             <input
               ref={groupNameRef}
@@ -130,11 +132,13 @@ const GroupStepComponent: React.FC<GroupStepProps> = ({
             />
           </div>
 
+          {/* Step Count Badge */}
           <div className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
             {stepCount} step{stepCount !== 1 ? 's' : ''}
           </div>
         </div>
 
+        {/* Action Buttons */}
         <div className="flex items-center space-x-2">
           <button
             onClick={() => handlers.addStepToGroup(step.id)}
@@ -145,29 +149,48 @@ const GroupStepComponent: React.FC<GroupStepProps> = ({
             <Plus className="w-4 h-4" />
             <span>Add Step</span>
           </button>
-          <button
-            onClick={confirmRemoveGroup}
-            disabled={isReadOnly}
-            className="p-2 bg-red-500 text-white rounded-md text-sm font-medium flex items-center hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            aria-label="Remove group"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+          
+          {!isReadOnly && (
+            <button
+              onClick={confirmRemoveGroup}
+              className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors"
+              aria-label="Remove group"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
+      {/* Group Steps */}
       {!isCollapsed && (
-        <div className="p-4">
+        <div className="pl-6 pr-4 pb-4">
           {hasSteps ? (
-            <div className="space-y-4">
-              {step.children?.map((s: PLCStep) => (
-                <StepComponent key={s.id} step={s} />
+            <div className="space-y-2">
+              {step.groupSteps?.map((groupStep, index) => (
+                <div key={groupStep.id} className="relative">
+                  {/* Step Index Indicator */}
+                  <div className="absolute -left-6 top-3 w-5 h-5 bg-blue-100 text-blue-600 rounded-full text-xs flex items-center justify-center font-medium">
+                    {index + 1}
+                  </div>
+                  
+                  <StepComponent
+                    key={groupStep.id}
+                    step={groupStep}
+                  />
+                </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
-              <p className="text-gray-500">This group is empty.</p>
-              <p className="text-sm text-gray-400 mt-1">Click &quot;Add Step&quot; to add a step to this group.</p>
+            <div className="text-center py-8 text-gray-500">
+              <div className="mb-2">No steps in this group</div>
+              <button
+                onClick={() => handlers.addStepToGroup(step.id)}
+                disabled={isReadOnly}
+                className="text-blue-500 hover:text-blue-600 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Add your first step
+              </button>
             </div>
           )}
         </div>

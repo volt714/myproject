@@ -1,44 +1,32 @@
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
-import { PLCStep, InstructionType, LogicalOperator, IOType, StructuralInstructionType } from '@/components/rfq-forms/controlpanel-rfq/types/plc-types';
-import { usePLCContext } from '../context/PLCProvider';
-
-// Helper functions to check instruction types
-const isInputInstruction = (type: InstructionType | StructuralInstructionType): boolean => {
-  return [InstructionType.XIC, InstructionType.XIO].includes(type as InstructionType);
-};
-
-const getInstructionIOType = (type: InstructionType | StructuralInstructionType): IOType | null => {
-  if ([InstructionType.XIC, InstructionType.XIO].includes(type as InstructionType)) {
-    return 'INPUT';
-  }
-  if ([InstructionType.OTE, InstructionType.OTL, InstructionType.OTU].includes(type as InstructionType)) {
-    return 'OUTPUT';
-  }
-  return null;
-};
+import { PLCStep, InstructionType, LogicalOperator } from '../types/plc';
+import { usePLCContext } from '../context/PLCContext';
 
 interface InstructionStepProps {
   step: PLCStep;
 }
 
-const InstructionStepComponent: React.FC<InstructionStepProps> = ({ step }) => {
-  const { config, handlers, stepHandlers, ioList } = usePLCContext();
-  const { instructions, logicalOperators } = config;
+export const InstructionStepComponent: React.FC<InstructionStepProps> = ({
+  step,
+}) => {
+  const { config, handlers, stepHandlers } = usePLCContext();
   const { 
-    toggleStepDropdown, 
-    updateStepType, 
+    instructions, 
+    labelOptions, 
+    logicalOperators 
+  } = config;
+  const {
+    toggleStepDropdown,
+    updateStepType,
   } = handlers;
-  const { 
-    updateStepOperator, 
-    updateElementIOPoint, 
+  const {
     toggleLabelDropdown,
+    updateStepLabel,
     updateElementCount,
-    toggleElementValue
+    toggleElementValue,
+    updateStepOperator,
   } = stepHandlers;
-
-  const instructionIOType = getInstructionIOType(step.type);
-  const availableIOPoints = instructionIOType ? ioList.filter(p => p.type === instructionIOType) : [];
 
   const handleCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const count = parseInt(e.target.value, 10);
@@ -48,19 +36,18 @@ const InstructionStepComponent: React.FC<InstructionStepProps> = ({ step }) => {
   };
 
   return (
-    <div className="flex items-center gap-2 w-full">
+    <>
       <div className="relative">
         <button
           onClick={() => toggleStepDropdown(step.id)}
-          className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm font-medium flex items-center gap-1 hover:bg-blue-200 min-w-[120px] justify-between"
+          className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm font-medium flex items-center space-x-1 hover:bg-blue-200"
         >
           <span>{step.type}</span>
-          <ChevronDown className="w-4 h-4" />
+          <ChevronDown className="w-3 h-3" />
         </button>
         {step.showDropdown && (
-          <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-20 min-w-[120px]">
-            {instructions
-              .map((instruction) => (
+          <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 min-w-[120px]">
+            {instructions.map((instruction) => (
               <button
                 key={instruction}
                 onClick={() => updateStepType(step.id, instruction as InstructionType)}
@@ -81,58 +68,68 @@ const InstructionStepComponent: React.FC<InstructionStepProps> = ({ step }) => {
         min="0"
       />
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 ml-2 flex-1">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 ml-2">
         {step.elements.map((element, index) => (
           <React.Fragment key={element.id}>
             <div className="flex items-center space-x-2">
               <div className="relative">
                 <button
-                  onClick={() => toggleLabelDropdown(step.id, `showLabelDropdown-element-${element.id}`)}
-                  className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm font-medium flex items-center space-x-1 hover:bg-gray-300 min-w-[120px] justify-between"
+                  onClick={() => toggleLabelDropdown(step.id, `showLabelDropdown-${index}`)}
+                  className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm font-medium flex items-center space-x-1 hover:bg-gray-300"
                 >
                   <span>{element.label}</span>
                   <ChevronDown className="w-3 h-3" />
                 </button>
-                {Boolean(step[`showLabelDropdown-element-${element.id}`]) && (
-                  <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 min-w-full">
-                    {availableIOPoints.map((ioPoint) => (
+                {step[`showLabelDropdown-${index}`] && (
+                  <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 min-w-[120px]">
+                    {labelOptions.map((option) => (
                       <button
-                        key={ioPoint.id}
-                        onClick={() => {
-                          updateElementIOPoint(step.id, index, ioPoint);
-                          toggleLabelDropdown(step.id, `showLabelDropdown-element-${element.id}`);
-                        }}
+                        key={option}
+                        onClick={() => updateStepLabel(step.id, `elements[${index}][label]`, option)}
                         className="block w-full px-3 py-2 text-left text-sm hover:bg-gray-100"
                       >
-                        {ioPoint.name}
+                        {option}
                       </button>
                     ))}
                   </div>
                 )}
               </div>
-              <button
-                onClick={() => toggleElementValue(step.id, index, !element.value)}
-                className={`px-3 py-1 rounded text-sm font-medium ${element.value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
-              >
-                {element.value ? 'ON' : 'OFF'}
-              </button>
+              <div
+                onClick={() => toggleElementValue(step.id, element.id)}
+                className={`w-5 h-5 rounded cursor-pointer ${
+                  element.value ? 'bg-green-500' : 'bg-red-500'
+                }`}
+              />
             </div>
 
-            {isInputInstruction(step.type) && index < step.elements.length - 1 && (
-              <div className="relative ml-2">
-                <select
-                  value={step.operators?.[index] || 'AND'}
-                  onChange={(e) => updateStepOperator(step.id, index, e.target.value as LogicalOperator)}
-                  className="px-2 py-1 border border-gray-300 rounded-md bg-white text-sm"
+            {step.type === 'INPUT' && step.operators && index < step.elements.length - 1 && (
+              <div className="relative">
+                <button
+                  onClick={() => toggleLabelDropdown(step.id, `showOperatorDropdown-${index}`)}
+                  className="px-3 py-1 bg-orange-100 text-orange-700 rounded text-sm font-medium flex items-center space-x-1 hover:bg-orange-200"
                 >
-                  {logicalOperators.map(op => <option key={op} value={op}>{op}</option>)}
-                </select>
+                  <span>{step.operators[index]}</span>
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+                {step[`showOperatorDropdown-${index}`] && (
+                  <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 min-w-[120px]">
+                    {logicalOperators.map((operator) => (
+                      <button
+                        key={operator}
+                        onClick={() => updateStepOperator(step.id, index, operator as LogicalOperator)}
+                        className="block w-full px-3 py-2 text-left text-sm hover:bg-gray-100"
+                      >
+                        {operator}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </React.Fragment>
         ))}
       </div>
-    </div>
+    </>
   );
 };
 

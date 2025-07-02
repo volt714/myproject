@@ -1,36 +1,40 @@
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
-import { PLCStep, InstructionType, TimerUnit } from '@/components/rfq-forms/controlpanel-rfq/types/plc-types';
-import { usePLCContext } from '../context/PLCProvider';
+import { PLCStep, InstructionType } from '../types/plc';
+import { usePLCContext } from '../context/PLCContext';
 
 interface DelayStepProps {
   step: PLCStep;
 }
 
-const DelayStepComponent: React.FC<DelayStepProps> = ({ step }) => {
+type TimeUnit = 'ms' | 'sec' | 'min';
+
+const DelayStepComponent: React.FC<DelayStepProps> = ({
+  step,
+}) => {
   const { config, handlers, stepHandlers } = usePLCContext();
-  const { instructions, timerUnits } = config;
-  const { toggleStepDropdown, updateStepType, updateStepValue } = handlers;
-  const { updateElementUnit } = stepHandlers;
+  const { instructions } = config;
+  const { toggleStepDropdown, updateStepType } = handlers;
+  const { updateStepValue, updateTimeUnit } = stepHandlers;
 
   const delayTime = (step.elements[0]?.value as number) || 0;
-  const timeUnit = (step.elements[0]?.unit as TimerUnit) || 'ms';
+  const timeUnit = (step.elements[0]?.unit as TimeUnit) || 'ms';
   const [showTimeUnitDropdown, setShowTimeUnitDropdown] = React.useState(false);
 
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10);
     if (!isNaN(value)) {
-      updateStepValue(step.id, value, step.elements[0]?.id);
+      updateStepValue(step.id, value);
     }
   };
 
-  const handleTimeUnitChange = (unit: TimerUnit) => {
-    updateElementUnit(step.id, 0, unit);
+  const handleTimeUnitChange = (unit: TimeUnit) => {
+    updateTimeUnit(step.id, unit);
     setShowTimeUnitDropdown(false);
   };
 
   return (
-    <div className="flex items-center space-x-2 flex-1">
+    <>
       <div className="relative">
         <button
           onClick={() => toggleStepDropdown(step.id)}
@@ -40,10 +44,8 @@ const DelayStepComponent: React.FC<DelayStepProps> = ({ step }) => {
           <ChevronDown className="w-3 h-3" />
         </button>
         {step.showDropdown && (
-          <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-20 min-w-[120px]">
-            {instructions
-              .filter(inst => inst === 'DELAY')
-              .map((instruction) => (
+          <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 min-w-[120px]">
+            {instructions.map((instruction) => (
               <button
                 key={instruction}
                 onClick={() => updateStepType(step.id, instruction as InstructionType)}
@@ -71,19 +73,22 @@ const DelayStepComponent: React.FC<DelayStepProps> = ({ step }) => {
           <ChevronDown className="w-3 h-3" />
         </button>
         {showTimeUnitDropdown && (
-          <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-20 min-w-[60px]">
-            {timerUnits.map((unit) => (
+          <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 min-w-[60px]">
+            {(['ms', 'sec', 'min'] as TimeUnit[]).map((unit) => (
               <button
                 key={unit}
-                onClick={() => handleTimeUnitChange(unit as TimerUnit)}
-                className={`block w-full px-3 py-2 text-left text-sm hover:bg-gray-100 ${timeUnit === unit ? 'bg-blue-50 text-blue-700' : ''}`}>
+                onClick={() => handleTimeUnitChange(unit)}
+                className={`block w-full px-3 py-2 text-left text-sm hover:bg-gray-100 ${
+                  timeUnit === unit ? 'bg-blue-50 text-blue-700' : ''
+                }`}
+              >
                 {unit}
               </button>
             ))}
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 };
 

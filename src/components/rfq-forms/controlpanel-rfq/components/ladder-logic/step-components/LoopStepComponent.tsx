@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
-import { PLCStep, InstructionType } from '@/components/rfq-forms/controlpanel-rfq/types/plc-types';
-import { usePLCContext } from '../context/PLCProvider';
+import { PLCStep, InstructionType } from '../types/plc';
+import { usePLCContext } from '../context/PLCContext';
 
 interface LoopStepProps {
   step: PLCStep;
@@ -14,7 +14,7 @@ const LoopStepComponent: React.FC<LoopStepProps> = ({
   const { instructions } = config;
   const { toggleStepDropdown, updateStepType } = handlers;
   const { updateLoopStart } = stepHandlers;
-
+  const countValue = (step.elements[0]?.value as number) || 0;
 
   const handleLoopStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = parseInt(e.target.value, 10);
@@ -36,7 +36,7 @@ const LoopStepComponent: React.FC<LoopStepProps> = ({
         </button>
         {step.showDropdown && (
           <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 min-w-[120px]">
-            {instructions.filter(i => i.startsWith('LOOP')).map((instruction) => (
+            {instructions.map((instruction) => (
               <button
                 key={instruction}
                 onClick={() => updateStepType(step.id, instruction as InstructionType)}
@@ -49,7 +49,7 @@ const LoopStepComponent: React.FC<LoopStepProps> = ({
         )}
       </div>
 
-      {step.type === InstructionType.LOOP_START && (
+      {step.type === 'LOOP START' && (
         <div className="flex items-center space-x-2">
           <span className="text-sm font-medium">Cycle Count</span>
           <input
