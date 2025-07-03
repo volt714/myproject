@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import IndustrialDashboard from './image1';
+import MachineStatusDisplay from './image2';
+import OperatorSelectionInterface from './image3';
 
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
@@ -12,9 +15,9 @@ const HMIImageGallery: React.FC<HMIImageGalleryProps> = ({ selectedImages, onSel
   const [currentIndex, setCurrentIndex] = useState(0);
   // Sample HMI screen images - replace with your actual image paths
   const hmiScreens = [
-    { id: 'screen1', path: '/images/hmi/screen1.png', name: 'Screen 1' },
-    { id: 'screen2', path: '/images/hmi/screen2.png', name: 'Screen 2' },
-    { id: 'screen3', path: '/images/hmi/screen3.png', name: 'Screen 3' },
+    { id: 'screen1', path: 'component_dashboard', name: 'Industrial Dashboard' },
+        { id: 'screen2', path: 'component_machine_status', name: 'Machine Status' },
+    { id: 'screen3', path: 'component_operator_selection', name: 'Operator Selection' },
     { id: 'screen4', path: '/images/hmi/screen4.png', name: 'Screen 4' },
     { id: 'screen5', path: '/images/hmi/screen5.png', name: 'Screen 5' },
     { id: 'screen6', path: '/images/hmi/screen6.png', name: 'Screen 6' },
@@ -95,14 +98,29 @@ const HMIImageGallery: React.FC<HMIImageGalleryProps> = ({ selectedImages, onSel
 
           {/* Main Image Display */}
           <div className="relative w-full aspect-video bg-gray-50 rounded-xl overflow-hidden shadow-lg">
-            <Image
-              src={currentScreen.path}
-              alt={currentScreen.name}
-              layout="fill"
-              objectFit="contain"
-              className="p-4"
-            />
-            
+            {currentScreen.path === 'component_dashboard' ? (
+              <div className="w-full h-full overflow-hidden transform scale-90">
+                <IndustrialDashboard />
+              </div>
+
+            ) : currentScreen.path === 'component_machine_status' ? (
+              <div className="w-full h-full overflow-hidden transform scale-90">
+                <MachineStatusDisplay />
+              </div>
+            ) : currentScreen.path === 'component_operator_selection' ? (
+              <div className="w-full h-full overflow-hidden transform scale-90">
+                <OperatorSelectionInterface />
+              </div>
+            ) : (
+              <Image
+                src={currentScreen.path!}
+                alt={currentScreen.name}
+                layout="fill"
+                objectFit="contain"
+                className="transition-opacity duration-500 p-4"
+                key={currentScreen.id}
+              />
+            )}
             {/* Image Info and Controls */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
               <div className="flex items-center justify-between">
@@ -160,6 +178,24 @@ const HMIImageGallery: React.FC<HMIImageGalleryProps> = ({ selectedImages, onSel
                   if (index >= 0) setCurrentIndex(index);
                 }}
               >
+                <div className="w-5 h-5 mr-2 rounded-sm overflow-hidden flex-shrink-0 bg-gray-200">
+                  {screen.path === 'component_dashboard' ? (
+                    <div className="w-full h-full bg-blue-400" title="Industrial Dashboard Component" />
+
+                  ) : screen.path === 'component_machine_status' ? (
+                    <div className="w-full h-full bg-gray-600" title="Machine Status Component" />
+                  ) : screen.path === 'component_operator_selection' ? (
+                    <div className="w-full h-full bg-black" title="Operator Selection Component" />
+                  ) : (
+                    <Image
+                      src={screen.path!}
+                      alt=""
+                      width={20}
+                      height={20}
+                      objectFit="cover"
+                    />
+                  )}
+                </div>
                 <span>{screen.name}</span>
                 <span
                   onClick={(e) => {
